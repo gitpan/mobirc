@@ -118,7 +118,6 @@ sub dispatch_clear_all_unread {
 
     my $response = HTTP::Response->new(302);
     my $root = $c->{config}->{httpd}->{root};
-    $root =~ s!/$!!;
 
     # SHOULD USE http://example.com/ INSTEAD OF http://example.com:portnumber/
     # because au phone returns '400 Bad Request' when redrirect to http://example.com:portnumber/
@@ -172,7 +171,6 @@ sub post_dispatch_show_channel {
         'Location' => (
                 'http://'
               . ($c->{config}->{httpd}->{host} || $c->{req}->header('Host'))
-              . $root
               . $path
               . '?time='
               . time

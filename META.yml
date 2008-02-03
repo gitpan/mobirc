@@ -5,7 +5,7 @@ author:
 build_requires: 
   Test::More: 0
 distribution_type: module
-generated_by: Module::Install version 0.68
+generated_by: Module::Install version 0.680
 license: gpl
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
@@ -52,4 +52,5 @@ requires:
   URI::Find: 0
   YAML: 0
   perl: 5.8.0
-version: 0.03
+tests: t/*.t t/*/*.t t/*/*/*.t
+version: 0.04
