@@ -24,6 +24,12 @@ text: http://d.hatena.ne.jp/
 conf: ~
 --- expected: <a href="http://d.hatena.ne.jp/" rel="nofollow" class="url">http://d.hatena.ne.jp/</a>
 
+=== basic with amp
+--- input
+text: http://www.google.co.jp/search?hl=ja&q=foo
+conf: ~
+--- expected: <a href="http://www.google.co.jp/search?hl=ja&amp;q=foo" rel="nofollow" class="url">http://www.google.co.jp/search?hl=ja&amp;q=foo</a>
+
 === basic scheme restrict
 --- input
 text: http://d.hatena.ne.jp/
@@ -67,7 +73,7 @@ conf: ~
 text: http://d.hatena.ne.jp/
 conf:
   pocket_hatena: true
---- expected: <a href="http://d.hatena.ne.jp/" rel="nofollow" class="url">http://d.hatena.ne.jp/</a><a href="http://mgw.hatena.ne.jp/?url=http%3A%2F%2Fd.hatena.ne.jp%2F&noimage=0&split=1" rel="nofollow" class="pocket_hatena">[ph]</a>
+--- expected: <a href="http://d.hatena.ne.jp/" rel="nofollow" class="url">http://d.hatena.ne.jp/</a><a href="http://mgw.hatena.ne.jp/?url=http%3A%2F%2Fd.hatena.ne.jp%2F;noimage=0;split=1" rel="nofollow" class="pocket_hatena">[ph]</a>
 
 === au_pcsv
 --- input
@@ -76,10 +82,17 @@ conf:
   au_pcsv: true
 --- expected: <a href="http://d.hatena.ne.jp/" rel="nofollow" class="url">http://d.hatena.ne.jp/</a><a href="device:pcsiteviewer?url=http://d.hatena.ne.jp/" rel="nofollow" class="au_pcsv">[PCSV]</a>
 
+=== au_pcsv with amp
+--- input
+text: http://www.google.co.jp/search?hl=ja&q=foo
+conf:
+  au_pcsv: true
+--- expected: <a href="http://www.google.co.jp/search?hl=ja&amp;q=foo" rel="nofollow" class="url">http://www.google.co.jp/search?hl=ja&amp;q=foo</a><a href="device:pcsiteviewer?url=http://www.google.co.jp/search?hl=ja&amp;q=foo" rel="nofollow" class="au_pcsv">[PCSV]</a>
+
 === google_gwt
 --- input
 text: http://d.hatena.ne.jp/
 conf:
   google_gwt: true
---- expected: <a href="http://d.hatena.ne.jp/" rel="nofollow" class="url">http://d.hatena.ne.jp/</a><a href="http://www.google.co.jp/gwt/n?u=http%3A%2F%2Fd.hatena.ne.jp%2F&_gwt_noimg=0" rel="nofollow" class="google_gwt">[gwt]</a>
+--- expected: <a href="http://d.hatena.ne.jp/" rel="nofollow" class="url">http://d.hatena.ne.jp/</a><a href="http://www.google.co.jp/gwt/n?u=http%3A%2F%2Fd.hatena.ne.jp%2F;_gwt_noimg=0" rel="nofollow" class="google_gwt">[gwt]</a>
 

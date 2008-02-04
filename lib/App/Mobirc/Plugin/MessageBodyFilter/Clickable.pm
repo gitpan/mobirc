@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use URI::Find;
 use URI::Escape;
+use HTML::Entities;
+use App::Mobirc::Util;
 @URI::tel::ISA = qw( URI );
 
 sub register {
@@ -63,29 +65,35 @@ sub process_http {
         }eg
     }
 
+    $link_string = encode_entities(uri_unescape($link_string),  q(<>&"));
+    my $encoded_uri = encode_entities($uri, q(<>&"));
+
     if ( $conf->{redirector} ) {
-        $out = sprintf('<a href="%s%s" rel="nofollow" class="url">%s</a>', $conf->{redirector}, $uri, $link_string);
+        $out =
+        sprintf(
+            '<a href="%s%s" rel="nofollow" class="url">%s</a>',
+            encode_entities($conf->{redirector}, q(<>&")),
+            $encoded_uri,
+            $link_string );
     } else {
-        $out = qq{<a href="$uri" rel="nofollow" class="url">$link_string</a>};
+        $out = qq{<a href="$encoded_uri" rel="nofollow" class="url">$link_string</a>};
     }
     if ( $conf->{au_pcsv} ) {
-        $out .=
-        sprintf( '<a href="device:pcsiteviewer?url=%s" rel="nofollow" class="au_pcsv">[PCSV]</a>',
-            $uri );
+        $out .= qq{<a href="device:pcsiteviewer?url=$encoded_uri" rel="nofollow" class="au_pcsv">[PCSV]</a>};
     }
     if ( $conf->{pocket_hatena} ) {
         $out .=
         sprintf(
-            '<a href="http://mgw.hatena.ne.jp/?url=%s&noimage=0&split=1" rel="nofollow" class="pocket_hatena">[ph]</a>',
+            '<a href="http://mgw.hatena.ne.jp/?url=%s;noimage=0;split=1" rel="nofollow" class="pocket_hatena">[ph]</a>',
             uri_escape($uri) );
     }
     if ( $conf->{google_gwt} ) {
         $out .=
         sprintf(
-            '<a href="http://www.google.co.jp/gwt/n?u=%s&_gwt_noimg=0" rel="nofollow" class="google_gwt">[gwt]</a>',
+            '<a href="http://www.google.co.jp/gwt/n?u=%s;_gwt_noimg=0" rel="nofollow" class="google_gwt">[gwt]</a>',
             uri_escape($uri) );
     }
-    return $out;
+    return U $out;
 }
 
 sub process_default {

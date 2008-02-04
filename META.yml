@@ -53,4 +53,4 @@ requires:
   YAML: 0
   perl: 5.8.0
 tests: t/*.t t/*/*.t t/*/*/*.t
-version: 0.04
+version: 0.05
