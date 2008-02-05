@@ -38,7 +38,7 @@ requires:
   List::MoreUtils: 0
   List::Util: 0
   POE: 0
-  POE::Component::IRC: 0
+  POE::Component::IRC: 5.58
   POE::Component::Server::TCP: 0
   POE::Filter::HTTPD: 0
   POE::Sugar::Args: 0
@@ -53,4 +53,4 @@ requires:
   YAML: 0
   perl: 5.8.0
 tests: t/*.t t/*/*.t t/*/*/*.t
-version: 0.05
+version: 0.06
