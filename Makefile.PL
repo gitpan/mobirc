@@ -6,7 +6,6 @@ license  'gpl';
 
 # moooooose
 requires 'Moose'               => '0.45';
-requires 'MooseX::Singleton'   => '0.08';
 
 # poe
 requires 'POE'                         => '1.0002';
@@ -41,7 +40,6 @@ requires 'YAML'               => '0.66';
 requires 'UNIVERSAL::require' => '0.11';
 requires 'Storable'           => '2.18';
 requires 'List::MoreUtils'    => '0.22';
-requires 'Class::Accessor'    => '0.31';     # TODO: to be remove
 
 # Note.
 #  follow modules are contained by other module.

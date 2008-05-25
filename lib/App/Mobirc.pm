@@ -1,6 +1,6 @@
 package App::Mobirc;
 use Moose;
-with 'App::Mobirc::Role::Pluggable';
+with 'App::Mobirc::Role::Pluggable', 'App::Mobirc::Role::Context';
 use 5.00800;
 use Scalar::Util qw/blessed/;
 use POE;
@@ -12,12 +12,12 @@ use Carp;
 use App::Mobirc::Model::Server;
 use Encode;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 has server => (
     is      => 'ro',
     isa     => 'App::Mobirc::Model::Server',
-    default => sub { App::Mobirc::Model::Server->instance() },
+    default => sub { App::Mobirc::Model::Server->new() },
     handles => [qw/add_channel delete_channel channels get_channel delete_channel/], # for backward compatibility
 );
 
@@ -27,17 +27,12 @@ has config => (
     required => 1,
 );
 
-my $context;
-sub context { $context }
-
 around 'new' => sub {
     my ($next, $class, $config_stuff) = @_;
-    my $config = App::Mobirc::ConfigLoader->load($config_stuff);
+    my $config = App::Mobirc::ConfigLoader->load($config_stuff); # TODO: use coercing
 
     my $self = $next->( $class, config => $config );
     $self->load_plugins;
-
-    $context = $self;
 
     return $self;
 };
