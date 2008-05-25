@@ -6,7 +6,7 @@ use Carp;
 use List::MoreUtils qw/any/;
 use Encode;
 
-our @EXPORT = qw/true false DEBUG compact_channel_name normalize_channel_name daemonize decorate_irc_color U/;
+our @EXPORT = qw/true false DEBUG normalize_channel_name daemonize decorate_irc_color U/;
 
 sub true  () { 1 } ## no critic.
 sub false () { 0 } ## no critic.
@@ -19,50 +19,12 @@ sub DEBUG($) { ## no critic.
 }
 
 # -------------------------------------------------------------------------
-# shorten channel name
-
-sub compact_channel_name {
-    local ($_) = shift;
-
-    # #name:*.jp to %name
-    if (s/:\*\.jp$//) {
-        s/^#/%/;
-    }
-
-    # 末尾の単独の @ は取る (plumプラグインのmulticast.plm対策)
-    s/\@$//;
-
-    $_;
-}
-
-# -------------------------------------------------------------------------
 
 sub normalize_channel_name {
-    local ($_) = shift;
+    local $_ = shift;
     tr/A-Z[\\]^/a-z{|}~/;
     $_;
 }
-
-# -------------------------------------------------------------------------
-
-sub add_message {
-    my ( $poe, $channel, $who, $body, $class ) = @_;
-    carp "hmmm... class missing?" unless $class;
-
-    DEBUG "ADD MESSAGE TO $channel($class)";
-
-    my $canon_channel = normalize_channel_name($channel);
-
-    App::Mobirc->context->channels->{$canon_channel}->add_message(
-        App::Mobirc::Message->new(
-            who   => $who,
-            body  => $body,
-            class => $class,
-        )
-    );
-}
-
-# -------------------------------------------------------------------------
 
 # -------------------------------------------------------------------------
 

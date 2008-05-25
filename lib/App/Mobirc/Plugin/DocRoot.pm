@@ -21,7 +21,11 @@ sub _html_filter_docroot {
     my $root = $conf->{root};
     $root =~ s!/$!!;
 
-    my $doc = XML::LibXML->new->parse_html_string($content);
+    my $doc = eval { XML::LibXML->new->parse_html_string($content) };
+    if ($@) {
+        warn "$content, orz.\n $@";
+        return $content;
+    }
     for my $elem ($doc->findnodes('//a')) {
         if (my $href = $elem->getAttribute('href')) {
             if ($href =~ m{^/}) {
@@ -43,7 +47,10 @@ sub _html_filter_docroot {
         $elem->setAttribute(src => $root . $elem->getAttribute('src'));
     }
 
-    decode($doc->encoding, $doc->toStringHTML);
+    my $html = $doc->toStringHTML;
+    $html =~ s{<!DOCTYPE[^>]*>\s*}{};
+
+    decode($doc->encoding | "UTF-8", $html);
 }
 
 1;

@@ -1,20 +1,46 @@
-package App::Mobirc::Channel;
-use strict;
-use warnings;
+package App::Mobirc::Model::Channel;
+use Moose;
 use base qw/Class::Accessor::Fast/;
 use Scalar::Util qw/blessed/;
 use Carp;
-use List::MoreUtils qw/any/;
+use List::MoreUtils qw/any all/;
 use App::Mobirc::Util;
+use App::Mobirc::Model::Message;
 
-__PACKAGE__->mk_accessors(qw/message_log recent_log topic/);
+has message_log => (
+    is      => 'rw',
+    isa     => 'ArrayRef',
+    default => sub { +[] },
+);
 
-sub new {
-    my ($class, $global_context, $name) = @_;
-    croak "global context missing" unless blessed $global_context && $global_context->isa("App::Mobirc");
-    croak "Invalid channel name $name" if $name =~ / /;
-    bless {global_context => $global_context, name => $name, message_log => [], recent_log => []}, $class;
-}
+has recent_log => (
+    is      => 'rw',
+    isa     => 'ArrayRef',
+    default => sub { +[] },
+);
+
+has topic => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => '',
+);
+
+has global_context => (
+    is      => 'rw',
+    isa     => 'App::Mobirc',
+    default => sub { App::Mobirc->context },
+);
+
+has name => (
+    is       => 'rw',
+    isa      => 'Str',
+    required => 1,
+);
+
+around 'new' => sub {
+    my ($next, $class, $trash, $name) = @_;
+    $next->($class, name => $name);
+};
 
 sub add_message {
     my ($self, $message) = @_;
@@ -30,8 +56,9 @@ sub add_message {
 
     # update keyword buffer.
     if ($message->class eq 'public' && $self->name ne '*keyword*') {
-        if (any { $message->body =~ /$_/i } @{$self->{global_context}->config->{global}->{keywords} || []}) {
-            App::Mobirc::Channel->update_keyword_buffer($self->{global_context}, $message);
+        if ((any { $message->body =~ /$_/i } @{$self->{global_context}->config->{global}->{keywords} || []})
+         && (all { $message->body !~ /$_/i } @{$self->{global_context}->config->{global}->{stopwords} || ["\0"]})) {
+            App::Mobirc::Model::Channel->update_keyword_buffer($self->{global_context}, $message);
         }
     }
 }
@@ -79,15 +106,9 @@ sub post_command {
     }
 }
 
-sub name {
-    my ($self, $name) = @_;
-
-    if (@_ == 1) {
-        return $self->{name};
-    } else {
-        croak "channel name is flagged utf8" unless Encode::is_utf8($name);
-        $self->{name} = $name;
-    }
+sub recent_log_count {
+    my $self = shift;
+    scalar @{ $self->recent_log };
 }
 
 1;
@@ -95,7 +116,7 @@ __END__
 
 =head1 NAME
 
-App::Mobirc::Channel - channel object for mobirc
+App::Mobirc::Model::Channel - channel object for mobirc
 
 =head1 DESCRIPTION
 

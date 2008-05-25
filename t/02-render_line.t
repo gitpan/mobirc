@@ -4,7 +4,7 @@ use utf8;
 use Test::Base;
 use App::Mobirc::HTTPD::Controller;
 use App::Mobirc;
-use App::Mobirc::Message;
+use App::Mobirc::Model::Message;
 
 plan tests => 1*blocks;
 
@@ -20,7 +20,15 @@ sub render_line {
     my $irc = bless {}, 'PoCoIRCMock';
     my $global_context = App::Mobirc->new(
         {
-            httpd => { port => 80 }
+            httpd  => { port => 80 },
+            plugin => [
+                {
+                    module => 'App::Mobirc::Plugin::Component::IRCClient',
+                    config => {
+                        groups => { initialJ => [qw(jknaoya jkondo jagayam)] },
+                    },
+                },
+               ]
         }
     );
     return App::Mobirc::HTTPD::Controller::render_line(
@@ -30,7 +38,7 @@ sub render_line {
 
 sub message {
     my $hash = shift;
-    App::Mobirc::Message->new(%$hash);
+    App::Mobirc::Model::Message->new(%$hash);
 }
 
 filters {
@@ -48,7 +56,7 @@ class: public
 time: 212
 who: Y*ppo__
 body: uh*aww
---- expected: <span class="time"><span class="hour">09</span><span class="colon">:</span><span class="minute">03</span></span> <span class='nick_normal'>(Y*ppo__)</span> <span class="public">uh*aww</span>
+--- expected: <span class="time"><span class="hour">09</span><span class="colon">:</span><span class="minute">03</span></span> <span class="nick_normal">(Y*ppo__)</span> <span class="public">uh*aww</span>
 
 === mine
 --- input
@@ -57,7 +65,7 @@ class: public
 time: 212
 who: tokuhirom
 body: uh*aww
---- expected: <span class="time"><span class="hour">09</span><span class="colon">:</span><span class="minute">03</span></span> <span class='nick_myself'>(tokuhirom)</span> <span class="public">uh*aww</span>
+--- expected: <span class="time"><span class="hour">09</span><span class="colon">:</span><span class="minute">03</span></span> <span class="nick_myself">(tokuhirom)</span> <span class="public">uh*aww</span>
 
 === XSS check
 --- input
@@ -66,4 +74,13 @@ class: public<
 time: 212
 who: tokuhirom<
 body: uh*aww<
---- expected: <span class="time"><span class="hour">09</span><span class="colon">:</span><span class="minute">03</span></span> <span class='nick_normal'>(tokuhirom&lt;)</span> <span class="public&lt;">uh*aww&lt;</span>
+--- expected: <span class="time"><span class="hour">09</span><span class="colon">:</span><span class="minute">03</span></span> <span class="nick_normal">(tokuhirom&lt;)</span> <span class="public&lt;">uh*aww&lt;</span>
+
+=== groups
+--- input
+channel: #mobirc
+class: public
+time: 212
+who: jagayama
+body: uh*aww
+--- expected: <span class="time"><span class="hour">09</span><span class="colon">:</span><span class="minute">03</span></span> <span class="nick_initialJ">(jagayama)</span> <span class="public">uh*aww</span>

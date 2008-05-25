@@ -3,9 +3,10 @@ abstract: ~
 author: 
   - Tokuhiro Matsuno and Mobirc AUTHORS.
 build_requires: 
+  Test::Exception: 0
   Test::More: 0
 distribution_type: module
-generated_by: Module::Install version 0.680
+generated_by: Module::Install version 0.68
 license: gpl
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
