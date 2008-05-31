@@ -11,12 +11,48 @@ sub register {
     DEBUG "Rewrite Document Root";
 
     $global_context->register_hook(
+        request_filter => sub { _request_filter($conf, @_) },
+    );
+    $global_context->register_hook(
+        response_filter => sub { _response_filter($conf, @_) },
+    );
+    $global_context->register_hook(
         'html_filter' => sub { _html_filter_docroot($_[0], $_[1], $conf) },
     );
 }
 
+sub _request_filter {
+    my ($conf, $c) = @_;
+
+    my $root = $conf->{root};
+    $root =~ s!/$!!;
+
+    my $path = $c->req->uri->path;
+    DEBUG "BEFORE : " . $c->req->uri;
+    $path =~ s!^$root!!;
+    $c->req->uri->path($path);
+    DEBUG "AFTER  : " . $c->req->uri;
+}
+
+sub _response_filter {
+    my ($conf, $c) = @_;
+
+    if ($c->res->redirect) {
+        DEBUG "REWRITE REDIRECT : " . $c->res->redirect;
+
+        my $root = $conf->{root};
+        $root =~ s!/$!!;
+        $c->res->redirect( $root . $c->res->redirect );
+
+        DEBUG "FINISHED: " . $c->res->redirect;
+    }
+}
+
 sub _html_filter_docroot {
     my ($c, $content, $conf) = @_;
+
+    DEBUG "FILTER DOCROOT";
+    DEBUG "CONTENT IS UTF* : " . Encode::is_utf8($content);
 
     my $root = $conf->{root};
     $root =~ s!/$!!;
@@ -44,13 +80,15 @@ sub _html_filter_docroot {
         $elem->setAttribute(href => $root . $elem->getAttribute('href'));
     }
     for my $elem ($doc->findnodes('//script')) {
-        $elem->setAttribute(src => $root . $elem->getAttribute('src'));
+        if ($elem->hasAttribute('src')) {
+            $elem->setAttribute(src => $root . $elem->getAttribute('src'));
+        }
     }
 
     my $html = $doc->toStringHTML;
     $html =~ s{<!DOCTYPE[^>]*>\s*}{};
 
-    decode($doc->encoding | "UTF-8", $html);
+    decode($doc->encoding || "UTF-8", $html);
 }
 
 1;

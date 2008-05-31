@@ -1,0 +1,15 @@
+/* page layout */
+* { margin : 0 ; padding : 0 ; font-size: 95%; }
+body { width : 100% ; }
+#body { position:relative ; }
+#footer { width:100% ; clear:both ; }
+
+#main { }
+#main #menu { position:absolute; right:0 ; padding-left: 5px; width : 250px ; }
+#main #contents { margin-right : 250px; height: 400px; padding-left: 5px; overflow: auto; } 
+
+#main #menu div { margin-bottom: 2px; }
+#main #menu div.unread { background-color: #99ffff; }
+#main #menu div.KeywordChannel { background-color: #ff99ff; }
+#main #menu hr { margin-bottom: 3px }
+

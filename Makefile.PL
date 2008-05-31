@@ -5,7 +5,10 @@ all_from 'lib/App/Mobirc.pm';
 license  'gpl';
 
 # moooooose
-requires 'Moose'               => '0.45';
+requires 'Moose'               => '0.46';
+
+# http-engine
+requires 'HTTP::Engine'        => '0.0.9';
 
 # poe
 requires 'POE'                         => '1.0002';
@@ -20,10 +23,11 @@ requires 'HTML::Entities::ConvertPictogramMobileJp' => '0.06';
 
 # template engine
 requires 'Template' => 2.16;                # new 'uri' is supported from 2.16
-requires 'Template::Provider::Encoding' => '0.10';
+requires 'Template::Declare'  => '0.28';
 
 # utilities
-requires 'CGI'                => '3.37';
+requires 'Data::Visitor::Encode' => '0.09';
+requires 'HTTPx::Dispatcher'  => '0.04';
 requires 'Carp'               => '1.04';
 requires 'Encode'             => '2.25';
 requires 'Exporter'           => '5.62';
@@ -33,6 +37,7 @@ requires 'HTML::Entities'     => '1.35';
 requires 'HTTP::Response'     => '5.811';
 requires 'Path::Class'        => '0.16';
 requires 'Proc::Daemon'       => '0.03';
+requires 'Params::Validate'   => '0.91';
 requires 'Scalar::Util'       => '0.19';
 requires 'URI'                => '1.36';
 requires 'URI::Find'          => '0.16';
@@ -40,6 +45,7 @@ requires 'YAML'               => '0.66';
 requires 'UNIVERSAL::require' => '0.11';
 requires 'Storable'           => '2.18';
 requires 'List::MoreUtils'    => '0.22';
+requires 'Module::Find'       => '0.06';
 
 # Note.
 #  follow modules are contained by other module.
@@ -65,10 +71,15 @@ features(
         -default => 0,
         recommends('CGI::Cookie', '1.29'),
     ],
+    'DocRoot' => [
+        -default => 0,
+        recommends('XML::LibXML', '1.66'),
+    ],
 );
 
-tests 't/*.t t/*/*.t t/*/*/*.t';
+tests 't/*.t t/*/*.t t/*/*/*.t t/*/*/*/*.t';
 test_requires 'Test::More';
+test_requires 'Text::Diff';
 test_requires 'Test::Exception';
 install_script 'mobirc';
 use_test_base;

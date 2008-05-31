@@ -10,12 +10,14 @@ has message_log => (
     is      => 'rw',
     isa     => 'ArrayRef',
     default => sub { +[] },
+    auto_deref => 1,
 );
 
 has recent_log => (
     is      => 'rw',
     isa     => 'ArrayRef',
     default => sub { +[] },
+    auto_deref => 1,
 );
 
 has topic => (
@@ -110,6 +112,7 @@ sub recent_log_count {
     scalar @{ $self->recent_log };
 }
 
+__PACKAGE__->meta->make_immutable;
 1;
 __END__
 
