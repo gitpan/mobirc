@@ -10,8 +10,8 @@ sub dispatch_base {
     render_td(
         $c,
         'ajax/base' => (
-            $c->req->mobile_agent,
-            ($c->{config}->{httpd}->{root} || '/'),
+            user_agent => $c->req->user_agent,
+            docroot    => (App::Mobirc->context->{config}->{httpd}->{root} || '/'),
         )
     );
 }
@@ -49,8 +49,8 @@ sub dispatch_menu {
     render_td(
         $c,
         'ajax/menu' => (
-            server,
-            server->keyword_channel->unread_lines,
+            server             => server,
+            keyword_recent_num => server->keyword_channel->unread_lines,
         )
     );
 }

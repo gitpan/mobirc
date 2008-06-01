@@ -5,7 +5,8 @@ all_from 'lib/App/Mobirc.pm';
 license  'gpl';
 
 # moooooose
-requires 'Moose'               => '0.46';
+requires 'Moose'               => '0.48';
+requires 'MooseX::Plaggerize'  => '0.03';
 
 # http-engine
 requires 'HTTP::Engine'        => '0.0.9';
@@ -74,6 +75,10 @@ features(
     'DocRoot' => [
         -default => 0,
         recommends('XML::LibXML', '1.66'),
+    ],
+    'DoCoMoGUID' => [
+        -default => 0,
+        recommends('HTML::StickyQuery::DoCoMoGUID', '1.66'),
     ],
 );
 

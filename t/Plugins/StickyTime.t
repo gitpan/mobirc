@@ -1,6 +1,5 @@
 use strict;
 use warnings;
-use App::Mobirc::Plugin::HTMLFilter::CompressHTML;
 use Test::Base;
 use App::Mobirc;
 
@@ -10,19 +9,25 @@ my $global_context = App::Mobirc->new(
         global => { keywords => [qw/foo/] }
     }
 );
-$global_context->load_plugin( 'HTMLFilter::CompressHTML' );
+$global_context->load_plugin( 'StickyTime' );
+
+plan tests => 1*blocks;
 
 filters {
-    input => [qw/compress/],
+    input => [qw/sticky/],
+    expected => [qw/eval/],
 };
 
-run_is input => 'expected';
+run {
+    my $block = shift;
+    like $block->input, $block->expected;
+};
 
-sub compress {
+sub sticky {
     my $html = shift;
     my $c = undef;
     ($c, $html) = $global_context->run_hook_filter('html_filter', $c, $html);
-    $html;
+    return $html;
 }
 
 __END__
@@ -33,9 +38,8 @@ __END__
 <!-- comment -->
 <div class="bar">
     yeah
+    <a href="/foo">foo</a>
 </div>
 --- expected
-<h1>foo</h1>
-<div class="bar">
-yeah
-</div>
+qr{<a href="/foo\?t=\d+">foo</a>}
+
