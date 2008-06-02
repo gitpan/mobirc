@@ -1,6 +1,6 @@
 package App::Mobirc;
 use Moose;
-with 'App::Mobirc::Role::Context', 'MooseX::Plaggerize', 'MooseX::Plaggerize::PluginLoader';
+with 'App::Mobirc::Role::Context', 'MooseX::Plaggerize';
 use 5.00800;
 use Scalar::Util qw/blessed/;
 use POE;
@@ -12,7 +12,7 @@ use Carp;
 use App::Mobirc::Model::Server;
 use Encode;
 
-our $VERSION = '0.99_02';
+our $VERSION = '0.99_03';
 
 has server => (
     is      => 'ro',

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use App::Mobirc::HTTPD::View;
+use App::Mobirc::Web::View;
 use App::Mobirc;
 use Test::Base;
 plan tests => 1*blocks;
@@ -15,7 +15,6 @@ my $c = App::Mobirc->new(
             {
                 module => 'Component::IRCClient',
                 config => {
-                    groups => { initialJ => [qw(jknaoya jkondo jagayam)] },
                     nick   => 'foo',
                     port   => 3333,
                     server => '127.0.0.1',
@@ -39,7 +38,7 @@ sub message {
 
 sub render {
     my $msg = shift;
-    App::Mobirc::HTTPD::View->show('irc_message', $msg, 'tokuhirom');
+    App::Mobirc::Web::View->show('irc_message', $msg, 'tokuhirom');
 }
 
 sub strip {
@@ -78,14 +77,4 @@ who: tokuhirom<
 body: uh*aww<
 --- expected
 <span class="time"><span class="hour">09</span><span class="colon">:</span><span class="minute">03</span></span><span class="nick_normal">&#40;tokuhirom&lt;&#41;</span><span class="public&lt;">uh*aww&lt;</span>
-
-=== groups
---- input
-channel: #mobirc
-class: public
-time: 212
-who: jagayama
-body: uh*aww
---- expected
-<span class="time"><span class="hour">09</span><span class="colon">:</span><span class="minute">03</span></span><span class="nick_initialJ">&#40;jagayama&#41;</span><span class="public">uh*aww</span>
 
