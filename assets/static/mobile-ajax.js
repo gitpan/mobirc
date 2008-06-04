@@ -1,110 +1,6 @@
-[% INCLUDE 'include/header.html' %]
-
-<textarea id="stylesheet" style="display: none">
-    body {
-        margin: 0;
-        padding: 0;
-    }
-    * {
-        margin: 0;
-        padding: 0;
-    }
-    h1 {
-        font-size: 1.3em;
-        border-bottom: 1px solid #808080;
-        background-color: #606060;
-        color: white;
-    }
-    ul.log, 
-    ul.log li {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-    }
-    ul.log li {
-        line-height: 1.2em;
-        padding: 2px 0;
-        border-top: 1px solid #e0e0e0;
-    }
-
-    .iframe-container iframe {
-        height: 50%;
-        width: 100%;
-    }
-
-    #recentlog-iframe-container iframe {
-        height: 30%;
-        width: 100%;
-    }
-
-    .keyword_recent_notice {
-        background-color: red;
-    }
-
-    .time {
-        color: #004080;
-    }
-    .notice {
-        color: #808080;
-    }
-    .join {
-        color: #ccfece;
-    }
-    .leave {
-        color: #cccefe;
-    }
-    .ctcp_action {
-        color: #808080;
-        font-style: italic;
-    }
-    .kick {
-        color: #fc4efe;
-    }
-    .snotice {
-        color: #408080;
-    }
-    .connect {
-        color: #408080;
-    }
-    .reconnect {
-        color: #408080;
-    }
-
-    .nick_normal { color: #000080; }
-    .nick_myself { color: #6060a0; }
-</textarea>
-
-<h1><select id="channel" onchange="Mobirc.onChangeChannel();">
-[% FOR channel IN channels -%]
-<option value="[% channel.name | uri %]">[% channel.name %]</option>
-[% END %]
-</select></h1>
-
-<div id="channel-iframe-container" class="iframe-container"></div>
-
-<!-- Form -->
-<form onsubmit="return Mobirc.onSubmit()" method="post">
-[% IF user_agent.match('(iPod|iPhone)') %]
-<input type="text" id="msg" name="msg" />
-[% ELSE %]
-<input type="text" id="msg" name="msg" size="30" />
-[% END %]
-<input type="submit" accesskey="1" value="OK[1]" />
-<!-- /Form --></form>
-
-<div id="recentlog-iframe-container" class="iframe-container"></div>
-
-<p style="border-top: 1px solid black"># <a href="[% docroot %]topics" accesskey="#">topics</a> | <a href="[% docroot %]keyword">keyword</a></p>
-
-<div class="VersionInfo">mobirc - <span class="version">[% version %]</span></div>
-
-<div id="jsonp-container"></div>
-<div id="submit-iframe-container" style="_isplay:none;"></div>
-
-<script type="text/javascript">
 window.onerror = function (e) { alert(e); }
 var SubmitUtil = {
-     containerId: 'submit-iframe-container'
+    containerId: 'submit-iframe-container'
 
     , hasXHR : false
     , setUp : function () {
@@ -121,7 +17,7 @@ var SubmitUtil = {
             try { this.submitIframe.contentWindow.document.charset = "Shift_JIS"; } catch (e) {}
             this.submitIframe.contentWindow.document.writeln("<body></body>");
         }
-     }
+    }
     , submit : function (channelEsc, msg) {
         if (this.hasXHR) 
             this.submitInternalXHR(channelEsc, msg);
@@ -137,7 +33,7 @@ var SubmitUtil = {
             }
         }
         xhr.send("msg="+encodeURIComponent(msg));
-     }
+    }
     , submitInternalIframe : function (channelEsc, msg) {
         var doc = this.submitIframe.contentWindow.document;
         doc.body.innerHTML = "";
@@ -149,7 +45,7 @@ var SubmitUtil = {
 
         var form = doc.createElement('form');
         form.acceptCharset = "Shift_JIS";
-        form.action = Mobirc.docroot + 'channels/' + channelEsc;
+        form.action = Mobirc.docroot + 'mobile-ajax/channel?channel=' + encodeURIComponent(channelEsc);
         form.method = 'POST';
         var input = doc.createElement('input');
         input.name = 'msg';
@@ -167,7 +63,7 @@ var SubmitUtil = {
 };
 
 var Mobirc = {
-    docroot   : '[% docroot %]',
+    docroot   : ___docroot,
     interval  : 15 * 1000,
     useIFrame : true,
 
@@ -194,12 +90,13 @@ var Mobirc = {
 
         var styleSheet = document.getElementById("stylesheet");
         if (!this.channelIframe.init) this.channelIframe.contentWindow.document.writeln("<style type='text/css'>"+styleSheet.value+"</style><body><ul class='log' id='lines'><li>Loading</li></ul></body>");
-        if (!this.recentLogIframe.init) this.recentLogIframe.contentWindow.document.writeln("<style type='text/css'>"+styleSheet.value+"</style><body><ul class='log' id='lines'><li>Loading</li></ul></body>");
+        if (!this.recentLogIframe.init) this.recentLogIframe.contentWindow.document.writeln("<style type='text/css'>"+styleSheet.value+"</style><body><ul class='log' id='lines'><li>not implemented yet</li></ul></body>");
 
         this.channelIframe.contentWindow.document.getElementById('lines').innerHTML = "";
         this.recentLogIframe.contentWindow.document.getElementById('lines').innerHTML = "";
         this.onChangeChannel();
-        this.requestJsonp('recent', true);
+        // TODO: re-implement
+        // this.requestJsonp('mobile-ajax/recent', true);
     }
     , createFormIframe : function (container) {
         var styleSheet = document.getElementsByTagName("style")[0];
@@ -207,7 +104,7 @@ var Mobirc = {
         //iframe.contentWindow.document.charset = "Shift_JIS";
         //iframe.contentWindow.document.writeln("<body></body>");
         return iframe;
-     }
+    }
     , createInheritedIframe : function (container) {
         var styleSheet = document.getElementsByTagName("style")[0];
         var iframe = IFrameUtil.createAndInsertIframe(container, this.onInheritedIframeCreated, false);
@@ -222,7 +119,8 @@ var Mobirc = {
     }
     , requestJsonp : function (path, recent)
     {
-        var uri = this.docroot + path + (recent ? '?t=' : '?time=')+(new Date()).valueOf();
+        var joinner = (path.indexOf('?') == -1) ? '?' : '&';
+        var uri = this.docroot + path + joinner + 't=' +(new Date()).valueOf();
 
         if (window.XMLHttpRequest) {
             XHRUtil.requestJsonp(uri);
@@ -251,13 +149,13 @@ var Mobirc = {
     , onChangeChannel : function () {
         this.stopInterval();
         this.channelIframe.contentWindow.document.getElementById('lines').innerHTML = "";
-        this.requestJsonp('channels/' + document.getElementById('channel').value);
+        this.requestJsonp('mobile-ajax/channel?channel=' + encodeURIComponent(document.getElementById('channel').value));
         this.startInterval();
     }
     , _onTick : function () { Mobirc.onTick(); }
     , onTick : function () {
-        this.requestJsonp('channels-recent/' + document.getElementById('channel').value);
-        this.requestJsonp('recent', true);
+        this.requestJsonp('mobile-ajax/channel?recent=1&channel=' + encodeURIComponent(document.getElementById('channel').value));
+        // this.requestJsonp('mobile-ajax/recent', true); TODO: reimplement
     }
     , onSubmit : function () {
         try {
@@ -364,7 +262,7 @@ var XHRUtil = {
 };
 
 var IFrameUtil = {
-      jsonpContainerId  : "container"
+    jsonpContainerId  : "container"
     , iframe : null
     , requestQueue : []
 
@@ -385,11 +283,11 @@ var IFrameUtil = {
     }
 
     , bindEvent : function (E, eventName, handler) {
-       if (E.addEventListener) {
-           E.addEventListener(eventName, handler, false);
-       } else if (E.attachEvent) {
-           E.attachEvent('on'+eventName, handler);
-       }
+    if (E.addEventListener) {
+        E.addEventListener(eventName, handler, false);
+    } else if (E.attachEvent) {
+        E.attachEvent('on'+eventName, handler);
+    }
     }
 
     , requestJsonp : function (path) {
@@ -424,8 +322,4 @@ var IFrameUtil = {
     }
 };
 
-
 Mobirc.setUp();
-</script>
-
-[% INCLUDE 'include/footer.html' %]

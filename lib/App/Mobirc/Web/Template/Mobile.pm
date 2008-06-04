@@ -7,6 +7,7 @@ use Params::Validate ':all';
 use List::Util qw/first/;
 use HTML::Entities qw/encode_entities/;
 use URI::Escape qw/uri_escape/;
+use HTTP::MobileAgent::Plugin::Charset;
 
 template 'mobile/wrapper_mobile' => sub {
     my ($self, $mobile_agent, $code, $subtitle) = @_;
@@ -148,7 +149,7 @@ template 'mobile/recent' => sub {
             mobile_agent  => 1,
         }
     );
-    my $channel = $args{channel};
+    my $channel = $args{channel} or die 'missing channel';
 
     show 'wrapper_mobile', $args{mobile_agent}, sub {
         div {
