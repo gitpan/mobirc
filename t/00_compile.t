@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 17;
+use Test::More tests => 16;
 
 use_ok 'App::Mobirc';
 use_ok 'App::Mobirc::Util';
@@ -18,7 +18,6 @@ use_ok 'App::Mobirc::Plugin::Authorizer::Cookie';
 use_ok 'App::Mobirc::Plugin::Authorizer::EZSubscriberID';
 use_ok 'App::Mobirc::Plugin::Authorizer::SoftBankID';
 
-use_ok 'App::Mobirc::Plugin::HTMLFilter::DoCoMoCSS';
 use_ok 'App::Mobirc::Plugin::HTMLFilter::CompressHTML';
 
 use_ok 'App::Mobirc::Plugin::IRCCommand::TiarraLog';

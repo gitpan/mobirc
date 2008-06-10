@@ -11,7 +11,7 @@ use Carp;
 use App::Mobirc::Model::Server;
 use Encode;
 
-our $VERSION = '0.99_04';
+our $VERSION = '0.99_05';
 
 has server => (
     is      => 'ro',
@@ -50,6 +50,9 @@ sub run {
     croak "this is instance method" unless blessed $self;
 
     $self->run_hook('run_component');
+
+    # POE::Sugar::Args => Devel::Caller::Perl => DB => DB::catch(do not catch here)
+    $SIG{INT} = sub { die "SIGINT\n" };
 
     $poe_kernel->run();
 }

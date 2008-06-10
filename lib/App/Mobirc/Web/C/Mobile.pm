@@ -2,8 +2,10 @@ package App::Mobirc::Web::C::Mobile;
 use Moose;
 use App::Mobirc::Web::C;
 use App::Mobirc::Util;
-use URI::Escape qw/uri_escape uri_unescape/;
+use URI::Escape qw(uri_escape_utf8);
 use Encode;
+use Encode::JP::Mobile;
+use MIME::Base64::URLSafe qw(urlsafe_b64decode);
 
 sub dispatch_index {
     my ($class, $c) = @_;
@@ -54,7 +56,7 @@ sub dispatch_clear_all_unread {
         $channel->clear_unread;
     }
 
-    $c->res->redirect('/');
+    $c->res->redirect('/mobile/');
 }
 
 # topic on every channel
@@ -69,20 +71,6 @@ sub dispatch_topics {
             }
         )
     );
-}
-
-sub post_dispatch_show_channel {
-    my ( $class, $c, $args) = @_;
-
-    my $channel = uri_unescape $args->{channel};
-
-    my $message = $c->req->params->{'msg'};
-
-    DEBUG "POST MESSAGE $message";
-
-    context->get_channel($channel)->post_command($message);
-
-    $c->res->redirect( $c->req->uri->path );
 }
 
 sub dispatch_keyword {
@@ -106,10 +94,15 @@ sub dispatch_keyword {
     $channel->clear_unread;
 }
 
-sub dispatch_show_channel {
+sub decode_urlsafe_encoded {
+    my $name = shift;
+    decode_utf8 urlsafe_b64decode($name);
+}
+
+sub dispatch_channel {
     my ($class, $c, $args, ) = @_;
 
-    my $channel_name = uri_unescape $args->{channel};
+    my $channel_name = decode_urlsafe_encoded $c->req->params->{channel};
     DEBUG "show channel page: $channel_name";
 
     my $channel = context->get_channel($channel_name);
@@ -119,14 +112,29 @@ sub dispatch_show_channel {
         'mobile/channel' => {
             mobile_agent        => $c->req->mobile_agent,
             channel             => $channel,
-            recent_mode         => $c->req->params->{recent_mode},
+            recent_mode         => $c->req->params->{recent_mode} || undef,
             message             => $c->req->params->{'msg'} || '',
-            channel_page_option => context->run_hook('channel_page_option', $channel, $c),
+            channel_page_option => context->run_hook('channel_page_option', $channel, $c) || [],
             irc_nick            => irc_nick,
         }
     );
 
     $channel->clear_unread;
+}
+
+sub post_dispatch_channel {
+    my ( $class, $c, $args) = @_;
+
+    my $channel_name = decode_urlsafe_encoded $c->req->params->{channel};
+
+    my $message = $c->req->params->{'msg'};
+
+    DEBUG "POST MESSAGE $message";
+
+    my $channel = context->get_channel($channel_name);
+    $channel->post_command($message);
+
+    $c->res->redirect( $c->req->uri->path . "?channel=" . $channel->name_urlsafe_encoded);
 }
 
 1;

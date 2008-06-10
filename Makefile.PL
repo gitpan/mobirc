@@ -9,7 +9,7 @@ requires 'Moose'               => '0.48';
 requires 'MooseX::Plaggerize'  => '0.03';
 
 # http-engine
-requires 'HTTP::Engine'        => '0.0.9';
+requires 'HTTP::Engine'        => '0.0.10';
 
 # poe
 requires 'POE'                         => '1.0002';
@@ -20,6 +20,7 @@ requires 'POE::Component::IRC'         => '5.58';
 requires 'Encode::JP::Mobile'                       => '0.25';
 requires 'HTTP::MobileAgent'                        => '0.27';
 requires 'HTTP::MobileAgent::Plugin::Charset'       => '0.03';
+requires 'HTTP::MobileAgent::Plugin::Locator'       => '0.01';
 requires 'HTML::Entities::ConvertPictogramMobileJp' => '0.06';
 
 # template engine
@@ -28,6 +29,7 @@ requires 'Template::Declare'  => '0.28';
 
 # utilities
 
+requires 'MIME::Base64::URLSafe' => '0.01';
 requires 'Carp'                  => '1.04';
 requires 'JSON'                  => '2.09';
 requires 'Data::Visitor::Encode' => '0.09';
@@ -47,6 +49,7 @@ requires 'Storable'              => '2.18';
 requires 'UNIVERSAL::require'    => '0.11';
 requires 'URI'                   => '1.36';
 requires 'URI::Find'             => '0.16';
+requires 'HTML::StickyQuery'     => '0.12';
 requires 'YAML'                  => '0.66';
 # Note.
 #  follow modules are contained by other module.
