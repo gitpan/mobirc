@@ -3,10 +3,11 @@ use strict;
 use MooseX::Plaggerize::Plugin;
 use CSS::Tiny;
 use XML::LibXML;
-use HTML::Selector::XPath;
+use HTML::Selector::XPath qw(selector_to_xpath);
 use App::Mobirc::Util;
 use Encode;
 use Path::Class;
+use XML::LibXML::XPathContext;
 
 # some code copied from HTML::DoCoMoCSS
 hook 'html_filter' => sub {
@@ -22,12 +23,26 @@ hook 'html_filter' => sub {
 
     my $css = CSS::Tiny->read_string($self->css_text($global_context));
     my $doc = eval { XML::LibXML->new->parse_string($content); };
-    $@ and return ($c, $pict_unescape->());
+    if (my $e = $@) {
+        warn $e;
+        return ($c, $pict_unescape->());
+    }
+    my $xc               = XML::LibXML::XPathContext->new($doc);
+    my $root             = $doc->documentElement();
+    my $namespace        = $root->getAttribute('xmlns');
+    my $namespace_prefix = '';
+    if ($namespace) {
+        # xhtml
+        $xc->registerNs( 'x', $namespace );
+        $namespace_prefix = 'x:';
+    }
 
     # apply inline css
     while (my($selector, $style) = each %{ $css }) {
         my $style_stringify = join ';', map { "$_:$style->{$_}" } keys %{ $style };
-        for my $element ( $doc->findnodes( HTML::Selector::XPath::selector_to_xpath($selector) ) ) {
+        my $xpath = selector_to_xpath($selector);
+        $xpath =~ s{^//}{//$namespace_prefix};
+        for my $element ( $xc->findnodes( $xpath ) ) {
             my $style_attr = $element->getAttribute('style');
             $style_attr = (!$style_attr) ? $style_stringify : (join ";", ($style_attr, $style_stringify));
             $style_attr .= ';' unless $style_attr =~ /;$/;
