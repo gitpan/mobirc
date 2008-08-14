@@ -9,7 +9,8 @@ requires 'Moose'               => '0.54';
 requires 'MooseX::Plaggerize'  => '0.03';
 
 # http-engine
-requires 'HTTP::Engine'        => '0.0.11';
+requires 'HTTP::Engine'         => '0.0.13'; # TODO: depend to recent version
+requires 'HTTP::Engine::Compat' => '0.0.1';
 
 # poe
 requires 'POE'                         => '1.003';
@@ -24,13 +25,13 @@ requires 'HTTP::MobileAgent::Plugin::Locator'       => '0.01';
 requires 'HTML::Entities::ConvertPictogramMobileJp' => '0.06';
 
 # template engine
-requires 'Template' => 2.16;                # new 'uri' is supported from 2.16
-requires 'Template::Declare'  => '0.28';
+requires 'Template' => 2.19;                # new 'uri' is supported from 2.16
+requires 'Template::Declare'  => '0.29';
 
 # utilities
 
 requires 'Carp'                  => '1.04';
-requires 'Data::Visitor::Encode' => '0.09';
+requires 'Data::Visitor::Encode' => '0.10001';
 requires 'Encode'                => '2.25';
 requires 'Exporter'              => '5.62';
 requires 'File::Spec'            => '3.2701';
