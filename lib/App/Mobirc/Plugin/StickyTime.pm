@@ -3,24 +3,25 @@ use strict;
 use MooseX::Plaggerize::Plugin;
 use App::Mobirc::Util;
 use HTML::StickyQuery;
+use App::Mobirc::Validator;
 
 hook response_filter => sub {
-    my ($self, $global_context, $c) = @_;
+    my ($self, $global_context, $res) = validate_hook('response_filter', @_);
 
-    if ($c->res->redirect) {
-        my $uri  = URI->new($c->res->redirect);
-        $uri->query_form( $uri->query_form, t => time() );
-        return $c->res->redirect( $uri->as_string );
+    if (my $loc = $res->header('Location')) {
+        my $joinner = ($loc =~ /\?/) ? '&' : '?';
+        $loc = $loc . $joinner . "t=@{[ time() ]}";
+        return $res->header( Location => $loc );
     }
 };
 
 hook html_filter => sub {
-    my ($self, $global_context, $c, $content) = @_;
+    my ($self, $global_context, $req, $content) = validate_hook('html_filter', @_);
 
     my $sticky = HTML::StickyQuery->new();
 
     return (
-        $c,
+        $req,
         $sticky->sticky(
             scalarref => \$content,
             param     => { t => time() },

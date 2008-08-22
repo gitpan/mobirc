@@ -41,5 +41,4 @@ sub daemonize {
     }
 }
 
-
 1;

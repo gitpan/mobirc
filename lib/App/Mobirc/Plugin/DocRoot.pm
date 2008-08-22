@@ -5,6 +5,7 @@ use App::Mobirc::Util;
 use XML::LibXML;
 use Encode;
 use Params::Validate ':all';
+use App::Mobirc::Validator;
 
 has root => (
     is       => 'ro',
@@ -13,36 +14,34 @@ has root => (
 );
 
 hook request_filter => sub {
-    my ($self, $global_context, $c) = validate_pos(@_,
-        { isa => __PACKAGE__ },
-        { isa => 'App::Mobirc' },
-        { isa => 'HTTP::Engine::Compat::Context' },
-    );
+    my ($self, $global_context, $req) = validate_hook('request_filter', @_);
 
     my $root = $self->root;
     $root =~ s!/$!!;
 
-    my $path = $c->req->uri->path;
+    my $path = $req->uri->path;
     $path =~ s!^$root!!;
-    $c->req->uri->path($path);
+    $req->uri->path($path);
 };
 
 hook response_filter => sub {
-    my ($self, $global_context, $c) = @_;
+    my ($self, $global_context, $res) = validate_hook('response_filter', @_);
 
-    if ($c->res->redirect) {
-        DEBUG "REWRITE REDIRECT : " . $c->res->redirect;
+    if (my $loc = $res->header('Location')) {
+        DEBUG "REWRITE REDIRECT : $loc";
 
         my $root = $self->root;
         $root =~ s!/$!!;
-        $c->res->redirect( $root . $c->res->redirect );
+        $loc = "$root$loc";
 
-        DEBUG "FINISHED: " . $c->res->redirect;
+        $res->header( Location => $loc );
+
+        DEBUG "FINISHED: $loc";
     }
 };
 
 hook html_filter => sub {
-    my ($self, $global_context, $c, $content, ) = @_;
+    my ($self, $global_context, $req, $content) = validate_hook('html_filter', @_);
 
     DEBUG "FILTER DOCROOT";
     DEBUG "CONTENT IS UTF* : " . Encode::is_utf8($content);
@@ -53,7 +52,7 @@ hook html_filter => sub {
     my $doc = eval { XML::LibXML->new->parse_html_string($content) };
     if ($@) {
         warn "$content, orz.\n $@";
-        return ($c, $content);
+        return ($req, $content);
     }
     for my $elem ($doc->findnodes('//a')) {
         if (my $href = $elem->getAttribute('href')) {
@@ -81,7 +80,7 @@ hook html_filter => sub {
     my $html = $doc->toStringHTML;
     $html =~ s{<!DOCTYPE[^>]*>\s*}{};
 
-    return ($c, decode($doc->encoding || "UTF-8", $html));
+    return ($req, decode($doc->encoding || "UTF-8", $html));
 };
 
 1;

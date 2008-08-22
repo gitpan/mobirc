@@ -11,7 +11,7 @@ use Carp;
 use App::Mobirc::Model::Server;
 use Encode;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 has server => (
     is      => 'ro',
@@ -57,6 +57,7 @@ sub run {
     $poe_kernel->run();
 }
 
+no Moose; __PACKAGE__->meta->make_immutable;
 1;
 __END__
 

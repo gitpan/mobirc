@@ -21,9 +21,9 @@ has expires => (
 );
 
 hook authorize => sub {
-    my ( $self, $global_context, $c, ) = validate_hook('authorize', @_);
+    my ( $self, $global_context, $req, ) = validate_hook('authorize', @_);
 
-    my $cookie_str = $c->req->header('Cookie');
+    my $cookie_str = $req->header('Cookie');
     unless ($cookie_str) {
         DEBUG "cookie header is empty";
         return false;
@@ -41,9 +41,9 @@ hook authorize => sub {
 };
 
 hook response_filter => sub {
-    my ($self, $global_context, $c) = validate_hook('response_filter', @_);
+    my ($self, $global_context, $res) = validate_hook('response_filter', @_);
 
-    $c->res->cookies->{mobirc_key} = CGI::Cookie->new(
+    $res->cookies->{mobirc_key} = CGI::Cookie->new(
         -name    => 'mobirc_key',
         -value   => _calc_digest($self->password),
         -expires => $self->expires,

@@ -3,9 +3,7 @@ use warnings;
 use Test::More;
 use App::Mobirc;
 use HTTP::MobileAgent;
-use HTTP::Engine::Compat middlewares => [
-    qw/ +App::Mobirc::Web::Middleware::MobileAgent /
-];
+use t::Utils;
 
 eval "use HTML::StickyQuery::DoCoMoGUID";
 plan skip_all => 'this test needs HTML::StickyQuery::DoCoMoGUID' if $@;
@@ -21,12 +19,11 @@ $mobirc->load_plugin( {module => 'Authorizer::DoCoMoGUID', config => {docomo_gui
 
 my $html = '<a href="/">foo</a>';
 
-my ($c, $got) = $mobirc->run_hook_filter('html_filter', create_c(), $html);
+test_he_filter {
+    my $req = shift;
+    $req->user_agent('DoCoMo/2.0 SH904i(c100;TB;W24H16)');
+    ($req, $html) = $mobirc->run_hook_filter('html_filter', $req, $html);
+};
 
-is $got, '<a href="/?guid=ON">foo</a>';
+is $html, '<a href="/?guid=ON">foo</a>';
 
-sub create_c {
-    my $c = HTTP::Engine::Compat::Context->new;
-    $c->req->user_agent('DoCoMo/2.0 SH904i(c100;TB;W24H16)');
-    $c;
-}

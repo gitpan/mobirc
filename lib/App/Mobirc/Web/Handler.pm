@@ -16,23 +16,34 @@ my $dve = Data::Visitor::Encode->new;
 sub context () { App::Mobirc->context } ## no critic
 
 sub handler {
-    my $c = shift;
+    my $req = shift;
 
-    context->run_hook('request_filter', $c);
+    my $res = _handler($req);
+    context->run_hook('response_filter', $res);
+    $res;
+}
 
-    if (authorize($c)) {
-        process_request($c);
-        context->run_hook('response_filter', $c);
+sub _handler {
+    my $req = shift;
+
+    context->run_hook('request_filter', $req);
+
+    if (authorize($req)) {
+        return process_request($req);
     } else {
-        $c->res->status(401);
-        $c->res->header('WWW-Authenticate' => qq(Basic Realm="mobirc"));
+        HTTP::Engine::Response->new(
+            status => 401,
+            headers => HTTP::Headers->new(
+                'WWW-Authenticate' => qq{Basic Realm="mobirc"}
+            ),
+        );
     }
 }
 
 sub authorize {
-    my $c = shift;
+    my $req = shift;
 
-    if (context->run_hook_first('authorize', $c)) {
+    if (context->run_hook_first('authorize', $req)) {
         DEBUG "AUTHORIZATION SUCCEEDED";
         return 1; # authorization succeeded.
     } else {
@@ -41,25 +52,26 @@ sub authorize {
 }
 
 sub process_request {
-    my ($c, ) = @_;
+    my ($req, ) = @_;
 
-    my $rule = App::Mobirc::Web::Router->match($c->req);
+    my $rule = App::Mobirc::Web::Router->match($req);
 
     unless ($rule) {
         # hook by plugins
-        if (context->run_hook_first( 'httpd', ( $c, $c->req->uri->path ) ) ) {
+        if (my $res = context->run_hook_first( 'httpd', $req )) {
             # XXX we should use html filter?
-            return;
+            return $res;
         }
 
         # doesn't match.
         do {
-            my $uri = $c->req->uri->path;
+            my $uri = $req->uri->path;
             warn "dan the 404 not found: $uri" if $uri ne '/favicon.ico';
-            # TODO: use $c->res->status(404)
-            $c->res->status(404);
-            $c->res->body("Dan the 404 not found: $uri");
-            return;
+
+            return HTTP::Engine::Response->new(
+                status => 404,
+                body   => "404 not found: $uri",
+            );
         };
     }
 
@@ -68,11 +80,11 @@ sub process_request {
     my $meth = $rule->{action};
     my $post_meth = "post_dispatch_$meth";
     my $get_meth  = "dispatch_$meth";
-    my $args = $dve->decode( $c->req->mobile_agent->encoding, $rule->{args} );
-    if ( $c->req->method =~ /POST/i && $controller->can($post_meth)) {
-        return $controller->$post_meth($c, $args);
+    my $args = $dve->decode( $req->mobile_agent->encoding, $rule->{args} );
+    if ( $req->method =~ /POST/i && $controller->can($post_meth)) {
+        return $controller->$post_meth($req, $args);
     } else {
-        return $controller->$get_meth($c, $args);
+        return $controller->$get_meth($req, $args);
     }
 }
 
