@@ -6,7 +6,7 @@ build_requires:
   Test::Exception: 0
   Test::More: 0
 distribution_type: module
-generated_by: Module::Install version 0.68
+generated_by: Module::Install version 0.680
 license: gpl
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
@@ -25,6 +25,7 @@ requires:
   CSS::Tiny: 0
   Carp: 0
   Class::Accessor: 0
+  Class::Component: 0.14
   Encode: 0
   Encode::JP::Mobile: 0
   Exporter: 0
@@ -38,11 +39,13 @@ requires:
   Kwalify: 0
   List::MoreUtils: 0
   List::Util: 0
+  Moose: 0.38
   POE: 0
   POE::Component::IRC: 5.58
   POE::Component::Server::TCP: 0
   POE::Filter::HTTPD: 0
   POE::Sugar::Args: 0
+  Path::Class: 0
   Proc::Daemon: 0
   Scalar::Util: 0
   Storable: 0

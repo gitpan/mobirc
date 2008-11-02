@@ -11,6 +11,9 @@ requires 'MooseX::Plaggerize'  => '0.03';
 # http-engine
 requires 'HTTP::Engine'         => '0.0.15';
 
+# session
+requires 'HTTP::Session'        => '0.07';
+
 # poe
 requires 'POE'                         => '1.003';
 requires 'POE::Sugar::Args'            => '1.3';
@@ -22,13 +25,13 @@ requires 'HTTP::MobileAgent'                        => '0.27';
 requires 'HTTP::MobileAgent::Plugin::Charset'       => '0.03';
 requires 'HTTP::MobileAgent::Plugin::Locator'       => '0.01';
 requires 'HTML::Entities::ConvertPictogramMobileJp' => '0.06';
+requires 'HTML::StickyQuery::DoCoMoGUID'            => '0.01';
 
 # template engine
 requires 'Template' => 2.19;                # new 'uri' is supported from 2.16
 requires 'Template::Declare'  => '0.29';
 
 # utilities
-
 requires 'Carp'                  => '1.04';
 requires 'Data::Visitor::Encode' => '0.10001';
 requires 'Encode'                => '2.25';
@@ -78,10 +81,6 @@ features(
     'DocRoot' => [
         -default => 0,
         recommends('XML::LibXML', '1.66'),
-    ],
-    'DoCoMoGUID' => [
-        -default => 0,
-        recommends('HTML::StickyQuery::DoCoMoGUID', '1.66'),
     ],
     'Irssi' => [
         -default => 0,
