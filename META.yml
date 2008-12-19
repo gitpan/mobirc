@@ -50,4 +50,4 @@ requires:
   URI::Find: 0.16
   YAML: 0.66
   perl: 5.8.0
-version: 1.08_01
+version: 1.08_02
