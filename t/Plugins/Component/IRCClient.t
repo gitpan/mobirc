@@ -1,5 +1,4 @@
-use strict;
-use warnings;
+use t::Utils;
 use POE;
 use App::Mobirc::Plugin::Component::IRCClient;
 use App::Mobirc;
@@ -16,11 +15,7 @@ my $PORT = 9999;
 
 $SIG{INT} = sub { die };
 
-my $global_context = App::Mobirc->new(
-    {
-        httpd => { },
-    }
-);
+my $global_context = global_context();
 $global_context->load_plugin(
     {
         module => 'Component::IRCClient',
@@ -52,7 +47,7 @@ sub _start {
 sub test {
     my ($kernel, $heap) = @_[ KERNEL, HEAP ];
 
-    my $context = App::Mobirc->context;
+    my $context = global_context();
 
     my $tasks_for = {
         '#coderepos' => [

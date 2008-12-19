@@ -1,17 +1,9 @@
-use strict;
-use warnings;
+use t::Utils;
 use App::Mobirc::Plugin::HTMLFilter::CompressHTML;
 use Test::Base;
 use App::Mobirc;
-use t::Utils;
 
-my $global_context = App::Mobirc->new(
-    {
-        httpd  => { lines => 40 },
-        global => { keywords => [qw/foo/] }
-    }
-);
-$global_context->load_plugin( 'HTMLFilter::CompressHTML' );
+global_context->load_plugin( 'HTMLFilter::CompressHTML' );
 
 filters {
     input => [qw/compress/],
@@ -24,7 +16,7 @@ sub compress {
     my $c = undef;
     test_he_filter {
         my $req = shift;
-        ($req, $html) = $global_context->run_hook_filter('html_filter', $req, $html);
+        ($req, $html) = global_context->run_hook_filter('html_filter', $req, $html);
     };
     $html;
 }

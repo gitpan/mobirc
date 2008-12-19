@@ -1,14 +1,24 @@
 package App::Mobirc::Web::View;
 use strict;
 use warnings;
-use Template::Declare;
-use Module::Find;
-my @templates = useall 'App::Mobirc::Web::Template';
-Template::Declare->init(roots => [@templates]);
+use File::Spec;
+use String::CamelCase qw/decamelize/;
+use App::Mobirc::Util;
 
 sub show {
     my ($class, @args) = @_;
-    Template::Declare->show(@args);
+    my $c = App::Mobirc::Web::Handler->web_context() or die "this module requires web_context!";
+
+    my $fname = do {
+        my $pkg = decamelize($c->controller);
+        my $action = $c->action;
+        File::Spec->catfile($pkg, "${action}.mt");
+    };
+
+    global_context->mt->render_file(
+        $fname,
+        @args,
+    )->as_string;
 }
 
 1;

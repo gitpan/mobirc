@@ -1,17 +1,19 @@
 package App::Mobirc;
-use Moose;
-with 'App::Mobirc::Role::Context', 'MooseX::Plaggerize';
+use Mouse;
+with 'App::Mobirc::Role::Plaggable';
 use 5.00800;
 use Scalar::Util qw/blessed/;
 use POE;
-use App::Mobirc::ConfigLoader;
 use App::Mobirc::Util;
 use UNIVERSAL::require;
 use Carp;
 use App::Mobirc::Model::Server;
 use Encode;
+use App::Mobirc::Types 'Config';
+use Text::MicroTemplate::File;
+use App::Mobirc::Web::Template;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08_01';
 
 has server => (
     is      => 'ro',
@@ -22,20 +24,36 @@ has server => (
 
 has config => (
     is       => 'ro',
-    isa      => 'HashRef',
+    isa      => Config,
     required => 1,
+    coerce   => 1,
 );
 
-around 'new' => sub {
-    my ($next, $class, $config_stuff) = @_;
-    my $config = App::Mobirc::ConfigLoader->load($config_stuff); # TODO: use coercing
+has mt => (
+    is => 'ro',
+    isa => 'Text::MicroTemplate::File',
+    lazy => 1,
+    default => sub {
+        my $self = shift;
+        Text::MicroTemplate::File->new(
+            include_path => [ File::Spec->catdir($self->config->{global}->{assets_dir}, 'tmpl') ],
+            package_name => "App::Mobirc::Web::Template",
+            use_cache    => 1,
+        );
+    },
+);
 
-    my $self = $next->( $class, config => $config );
+{
+    my $context;
+    sub context { $context }
+    sub _set_context { $context = $_[1] }
+}
 
+sub BUILD {
+    my ($self, ) = @_;
     $self->_load_plugins();
-
-    return $self;
-};
+    $self->_set_context($self);
+}
 
 sub _load_plugins {
     my $self = shift;
@@ -57,7 +75,7 @@ sub run {
     $poe_kernel->run();
 }
 
-no Moose; __PACKAGE__->meta->make_immutable;
+no Mouse; __PACKAGE__->meta->make_immutable;
 1;
 __END__
 

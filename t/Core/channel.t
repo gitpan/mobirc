@@ -1,30 +1,10 @@
-use strict;
-use warnings;
-use Test::More tests => 8;
+use t::Utils;
+use Test::More tests => 4;
 use Test::Exception;
 use Encode;
 use App::Mobirc;
 use App::Mobirc::Util;
 use App::Mobirc::Model::Server;
-
-App::Mobirc->new(
-    {
-        httpd  => { lines => 40 },
-        global => { keywords => [qw/foo/], stopwords => [qw/foo31/] }
-    }
-);
-
-sub context () { App::Mobirc->context }
-sub server () { context->server }
-sub keyword_channel () { server->get_channel(U "*keyword*") }
-sub test_channel    () { server->get_channel(U '#test') }
-
-sub describe ($&) {
-    my ($name, $code) = @_;
-
-    $code->();
-    keyword_channel->clear_unread();
-}
 
 describe 'keyword', sub {
     test_channel->add_message(
@@ -48,20 +28,10 @@ describe 'stopword', sub {
 
 describe 'add & get', sub {
     my $channel = App::Mobirc::Model::Channel->new(
-        context, U '#test',
+        name => U '#test',
     );
-    context->add_channel($channel);
-    isa_ok context->get_channel(U '#test'), 'App::Mobirc::Model::Channel';
+    global_context->add_channel($channel);
+    isa_ok global_context->get_channel(U '#test'), 'App::Mobirc::Model::Channel';
 };
 
-# TODO: move to Model/Server.t
-describe 'channels', sub {
-    my @channels = server->channels;
-    is scalar(@channels), 2;
-    isa_ok $channels[0], 'App::Mobirc::Model::Channel';
-
-    my $channels = server->channels;
-    is ref($channels), 'ARRAY';
-    is_deeply $channels, \@channels;
-};
 

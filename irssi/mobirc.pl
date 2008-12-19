@@ -133,7 +133,7 @@ sub irssi_print_text {
     my ($dest, $text, $stripped) = @{ $poe->args->[1] };
 
     if ($dest->{level} & MSGLEVEL_HILIGHT) {
-        App::Mobirc::Model::Channel->update_keyword_buffer($poe->heap->{mobirc}, $poe->heap->{__last_row});
+        App::Mobirc::Model::Channel->update_keyword_buffer($poe->heap->{__last_row});
     }
 }
 
@@ -259,7 +259,7 @@ sub poe_initialize_mobirc {
     }
 
     my $mobirc;
-    eval { $mobirc = App::Mobirc->new($conffname) };
+    eval { $mobirc = App::Mobirc->new(config => $conffname) };
     if ($@) {
         Irssi::print("can't initialize mobirc: $@");
         return;
@@ -268,10 +268,10 @@ sub poe_initialize_mobirc {
     $poe->heap->{mobirc} = $mobirc;
     $poe->heap->{config} = $mobirc->config;
 
-    $mobirc->add_channel( App::Mobirc::Model::Channel->new($mobirc, U '*server*') );
+    $mobirc->add_channel( App::Mobirc::Model::Channel->new(name => U '*server*') );
     for my $channel (Irssi::channels()) {
         my $channel_name = normalize_channel_name(decode_utf8 $channel->{name});
-        $mobirc->add_channel( App::Mobirc::Model::Channel->new($mobirc, $channel_name) );
+        $mobirc->add_channel( App::Mobirc::Model::Channel->new(name => $channel_name) );
     }
 
     $mobirc;
@@ -332,7 +332,7 @@ mobirc.pl - irssi plugin for Mobirc
     
     2. run irssi with Mobirc
     
-       PERL5LIB=/path/to/mobirc/lib irssi
+       PERL5LIB=/path/to/mobirc/lib:/path/to/mobirc/extlib/ irssi
     
     3. start script in irssi
     
@@ -345,6 +345,10 @@ mobirc.pl - irssi plugin for Mobirc
     5. start mobirc
     
        /mobirc start
+
+=head1 KNOWN BUGS
+
+irssi dumps core at exit irssi. anyone can fix this?
 
 =head1 AUTHOR
 

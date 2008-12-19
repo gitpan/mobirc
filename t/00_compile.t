@@ -1,5 +1,4 @@
-use strict;
-use warnings;
+use t::Utils;
 use Test::More tests => 12;
 
 use_ok 'App::Mobirc';

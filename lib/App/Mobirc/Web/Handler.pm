@@ -1,9 +1,6 @@
 package App::Mobirc::Web::Handler;
-use Moose;
+use Mouse;
 use Scalar::Util qw/blessed/;
-use Data::Visitor::Encode;
-use HTTP::MobileAgent;
-use HTTP::MobileAgent::Plugin::Charset;
 use HTTP::Session;
 use HTTP::Session::Store::OnMemory;
 use HTTP::Session::State::Cookie;
@@ -14,26 +11,37 @@ use Module::Find;
 use App::Mobirc;
 use App::Mobirc::Util;
 use App::Mobirc::Web::Router;
+use App::Mobirc::Web::Context;
 useall 'App::Mobirc::Web::C';
 
 my $session_store = HTTP::Session::Store::OnMemory->new(data => {});
+if ($ENV{MOBIRC_DEBUG}) {
+    require HTTP::Session::Store::DBM;
+    $session_store = HTTP::Session::Store::DBM->new(
+        file => '/tmp/hoge.dbm'
+    );
+}
 
-sub context () { App::Mobirc->context } ## no critic
+our $CONTEXT;
+sub web_context () { $CONTEXT } ## no critic
 
 sub handler {
     my $req = shift;
 
     my $session = _create_session($req);
+
+    local $CONTEXT = App::Mobirc::Web::Context->new(req => $req, session => $session);
     my $res = _handler($req, $session);
-    context->run_hook('response_filter', $res);
+    global_context->run_hook('response_filter', $res);
     $session->response_filter( $res );
+    $session->finalize();
     $res;
 }
 
 sub _handler {
     my ($req, $session) = @_;
 
-    context->run_hook('request_filter', $req);
+    global_context->run_hook('request_filter', $req);
 
     if ($session->get('authorized')) {
         return process_request_authorized($req, $session);
@@ -44,7 +52,7 @@ sub _handler {
 
 sub _create_session {
     my $req = shift;
-    my $conf = context->config->{global}->{session};
+    my $conf = global_context->config->{global}->{session};
     my $ma = HTTP::MobileAttribute->new($req->headers);
     HTTP::Session->new(
         store   => $session_store,
@@ -64,6 +72,7 @@ sub _create_session {
                 )
             }
         }->(),
+        id      => 'HTTP::Session::ID::MD5',
         request => $req,
     );
 }
@@ -71,7 +80,7 @@ sub _create_session {
 sub authorize {
     my $req = shift;
 
-    if (context->run_hook_first('authorize', $req)) {
+    if (global_context->run_hook_first('authorize', $req)) {
         DEBUG "AUTHORIZATION SUCCEEDED";
         return 1; # authorization succeeded.
     } else {
@@ -86,7 +95,7 @@ sub process_request_authorized {
         return do_dispatch($rule, $req, $session);
     } else {
         # hook by plugins
-        if (my $res = context->run_hook_first( 'httpd', $req )) {
+        if (my $res = global_context->run_hook_first( 'httpd', $req )) {
             # XXX we should use html filter?
             return $res;
         }
@@ -121,8 +130,10 @@ sub do_dispatch {
     my $meth = $rule->{action};
     my $post_meth = "post_dispatch_$meth";
     my $get_meth  = "dispatch_$meth";
-    my $args = Data::Visitor::Encode->decode( $req->mobile_agent->encoding, $rule->{args} );
+    my $args = $rule->{args};
     $args->{session} = $session;
+    $CONTEXT->action( $rule->{action} );
+    $CONTEXT->controller( $rule->{controller} );
     if ( $req->method =~ /POST/i && $controller->can($post_meth)) {
         return $controller->$post_meth($req, $args);
     } else {
@@ -141,6 +152,6 @@ sub res_404 {
     );
 }
 
-no Moose;__PACKAGE__->meta->make_immutable;
+no Mouse;__PACKAGE__->meta->make_immutable;
 1;
 

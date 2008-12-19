@@ -1,10 +1,10 @@
 package App::Mobirc::Plugin::HTMLFilter::NickGroup;
 use strict;
-use MooseX::Plaggerize::Plugin;
+use App::Mobirc::Plugin;
 use List::Util qw/first/;
-use XML::LibXML;
 use Encode;
 use App::Mobirc::Validator;
+use HTML::TreeBuilder::XPath;
 
 has 'map' => (
     is       => 'ro',
@@ -33,26 +33,24 @@ has class_for => (
 hook 'html_filter' => sub {
     my ($self, $global_context, $req, $html) = validate_hook('html_filter', @_);
 
-    my $doc = eval { XML::LibXML->new->parse_html_string($html); };
-    if ($@) {
-        warn $@;
-        return ($req, $html);
-    }
+    my $tree = HTML::TreeBuilder::XPath->new;
+    $tree->parse_content($html);
 
-    for my $elem ($doc->findnodes(q{//span[@class='nick_normal']})) {
+    for my $elem ($tree->findnodes(q{//span[@class='nick_normal']})) {
         if (my $who = $elem->findvalue('./text()')) {
             $who =~ s!^\((.+)\)$!$1!; # (who) => who
 
             if (my $new_class = $self->_class($who)) {
-                $elem->setAttribute(class => $new_class);
+                $elem->attr(class => $new_class);
             }
         }
     }
 
-    $html = $doc->toStringHTML();
-    $html =~ s{<!DOCTYPE[^>]*>\s*}{};
-    $html =~ s{(<a[^>]+)/>}{$1></a>}gi;
-    return ($req, decode($doc->encoding || "UTF-8", $html));
+    $html = $tree->as_HTML();
+
+    $tree = $tree->delete; # cleanup
+
+    return ($req, decode_utf8($html));
 };
 
 sub _class {

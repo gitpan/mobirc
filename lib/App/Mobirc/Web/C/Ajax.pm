@@ -1,41 +1,24 @@
 package App::Mobirc::Web::C::Ajax;
-use Moose;
 use App::Mobirc::Web::C;
 use App::Mobirc::Util;
 use Encode;
 
 sub dispatch_base {
-    my ($class, $req) = @_;
-
-    render_td(
-        $req,
-        'ajax/base' => (
-            user_agent => $req->user_agent,
-            docroot    => (App::Mobirc->context->{config}->{httpd}->{root} || '/'),
-        )
-    );
+    render_td();
 }
 
 sub dispatch_channel {
-    my ($class, $req,) = @_;
-    my $channel_name = $req->params->{channel};
+    my $channel_name = param('channel') or die "missing channel name";
 
     my $channel = server->get_channel($channel_name);
-    my $res = render_td(
-        $req,
-        'ajax/channel' => (
-            channel  => $channel,
-            irc_nick => irc_nick,
-        )
-    );
+    my $res = render_td( $channel );
     $channel->clear_unread();
     return $res;
 }
 
 sub post_dispatch_channel {
-    my ( $class, $req, ) = @_;
-    my $channel = $req->params->{channel};
-    my $message = $req->parameters->{'msg'};
+    my $channel = param('channel');
+    my $message = param('msg');
 
     DEBUG "POST MESSAGE $message";
 
@@ -49,27 +32,11 @@ sub post_dispatch_channel {
 }
 
 sub dispatch_menu {
-    my ($class, $req) = @_;
-
-    render_td(
-        $req,
-        'ajax/menu' => (
-            server             => server,
-            keyword_recent_num => server->keyword_channel->unread_lines,
-        )
-    );
+    render_td();
 }
 
 sub dispatch_keyword {
-    my ($class, $req ) = @_;
-
-    my $res = render_td(
-        $req,
-        'ajax/keyword' => {
-            logs     => scalar(server->keyword_channel->message_log),
-            irc_nick => irc_nick,
-        }
-    );
+    my $res = render_td();
     server->keyword_channel->clear_unread();
     $res;
 }

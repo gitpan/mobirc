@@ -1,5 +1,4 @@
-use strict;
-use warnings;
+use t::Utils;
 use Test::More tests => 2;
 use App::Mobirc::ConfigLoader;
 use FindBin;

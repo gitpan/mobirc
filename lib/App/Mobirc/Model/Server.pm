@@ -1,6 +1,6 @@
 package App::Mobirc::Model::Server;
 use strict;
-use Moose;
+use Mouse;
 use App::Mobirc::Model::Channel;
 use Carp;
 use App::Mobirc::Util;
@@ -28,7 +28,7 @@ sub get_channel {
     my ($self, $name) = @_;
     croak "channel name is flagged utf8" unless Encode::is_utf8($name);
     croak "invalid channel name : $name" if $name =~ / /;
-    return $self->channel_map->{$name} ||= App::Mobirc::Model::Channel->new($self, $name);
+    return $self->channel_map->{$name} ||= App::Mobirc::Model::Channel->new(name=> $name);
 }
 
 sub delete_channel {
@@ -70,6 +70,20 @@ sub channels_sorted {
           $self->channels
     ];
     wantarray ? @$channels : $channels;
+}
+
+sub has_unread_message {
+    my $self = shift;
+    for my $channel ($self->channels) {
+        return 1 if $channel->unread_lines;
+    }
+    return 0;
+}
+
+sub unread_channels {
+    my $self = shift;
+    my @channels = grep { $_->unread_lines } $self->channels;
+    wantarray ? @channels : \@channels;
 }
 
 __PACKAGE__->meta->make_immutable;
