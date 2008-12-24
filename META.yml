@@ -24,6 +24,7 @@ recommends:
   POE::Session::Irssi: 0.4
 requires:
   CSS::Tiny: 1.15
+  Config::Tiny: 2.12
   Exporter: 5.62
   HTML::Entities: 1.35
   HTML::StickyQuery: 0.12
@@ -50,4 +51,4 @@ requires:
   URI::Find: 0.16
   YAML: 0.66
   perl: 5.8.0
-version: 1.08_02
+version: 1.99_01

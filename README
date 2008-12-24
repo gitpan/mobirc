@@ -20,8 +20,16 @@ based on
     - perl
     - POE
 
+Requirements
+------------------------------------------------------
+
+    perl 5.8.0 or later(5.8.8 or later is recommended)
+    LWP
+
 How to install?
 ------------------------------------------------------
+
+Install LWP(libwww-perl) first.
 
     git clone git://github.com/tokuhirom/mobirc.git
 
@@ -33,7 +41,7 @@ or
 
 and, run following command.
 
-    cp config.yaml.sample config.yaml
-    vi config.yaml # edit configuration file for your environemnt
+    cp config.ini.sample config.ini
+    vi config.ini # edit configuration file for your environemnt
     ./mobirc
 
