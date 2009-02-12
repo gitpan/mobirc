@@ -3,7 +3,7 @@ package Sub::Uplevel;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '0.1901';
+$VERSION = '0.18';
 
 # We must override *CORE::GLOBAL::caller if it hasn't already been 
 # overridden or else Perl won't see our local override later.
@@ -16,7 +16,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(uplevel);
 
-#line 83
+#line 79
 
 use vars qw/@Up_Frames $Caller_Proxy/;
 # @Up_Frames -- uplevel stack
@@ -42,30 +42,18 @@ sub uplevel {
     return $func->(@args);
 }
 
-sub _normal_caller (;$) { ## no critic Prototypes
+sub _normal_caller (;$) {
     my $height = $_[0];
     $height++;
-    if ( CORE::caller() eq 'DB' ) {
-        # passthrough the @DB::args trick
-        package DB;
-        if( wantarray and !@_ ) {
-            return (CORE::caller($height))[0..2];
-        }
-        else {
-            return CORE::caller($height);
-        }
+    if( wantarray and !@_ ) {
+        return (CORE::caller($height))[0..2];
     }
     else {
-        if( wantarray and !@_ ) {
-            return (CORE::caller($height))[0..2];
-        }
-        else {
-            return CORE::caller($height);
-        }
+        return CORE::caller($height);
     }
 }
 
-sub _uplevel_caller (;$) { ## no critic Prototypes
+sub _uplevel_caller (;$) {
     my $height = $_[0] || 0;
 
     # shortcut if no uplevels have been called
@@ -73,7 +61,7 @@ sub _uplevel_caller (;$) { ## no critic Prototypes
     # to skip this function's caller
     return $Caller_Proxy->( $height + 1 ) if ! @Up_Frames;
 
-#line 188
+#line 172
 
     my $saw_uplevel = 0;
     my $adjust = 0;
@@ -97,15 +85,7 @@ sub _uplevel_caller (;$) { ## no critic Prototypes
 
     # For returning values, we pass through the call to the proxy caller
     # function, just at a higher stack level
-    my @caller;
-    if ( CORE::caller() eq 'DB' ) {
-        # passthrough the @DB::args trick
-        package DB;
-        @caller = $Sub::Uplevel::Caller_Proxy->($height + $adjust + 1);
-    }
-    else {
-        @caller = $Caller_Proxy->($height + $adjust + 1);
-    }
+    my @caller = $Caller_Proxy->($height + $adjust + 1);
 
     if( wantarray ) {
         if( !@_ ) {
@@ -118,7 +98,7 @@ sub _uplevel_caller (;$) { ## no critic Prototypes
     }
 }
 
-#line 298
+#line 274
 
 
 1;

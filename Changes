@@ -1,3 +1,9 @@
+1.99_03
+
+    2.00 RC3
+
+    - oops. depend to Net::CIDR::MobileJP 0.16
+
 1.99_02
 
     2.00 RC2

@@ -22,6 +22,7 @@ requires 'POE::Component::IRC' => '5.88';
 
 # mobile stuff
 requires 'HTTP::MobileAttribute' => '0.13';
+requires 'Net::CIDR::MobileJP'   => '0.16';
 
 # template engine
 requires 'Text::MicroTemplate' => '0.05';
