@@ -1,12 +1,15 @@
 package App::Mobirc::Web::C;
 use strict;
 use warnings;
+use base qw/Exporter/;
 use App::Mobirc::Util;
 use App::Mobirc::Web::View;
 use App::Mobirc::Web::Template;
 use Encode;
 use Carp ();
 use App::Mobirc::Web::Base;
+
+our @EXPORT = qw/context server render_irc_message render redirect session req param mobile_attribute config/;
 
 sub import {
     my $class = __PACKAGE__;
@@ -15,10 +18,7 @@ sub import {
     strict->import;
     warnings->import;
 
-    no strict 'refs';
-    for my $meth (qw/context server render_irc_message render redirect session req param mobile_attribute config/) {
-        *{"$pkg\::$meth"} = *{"$class\::$meth"};
-    }
+    __PACKAGE__->export_to_level(1);
     App::Mobirc::Web::Base->export_to_level(1);
 }
 
@@ -41,10 +41,10 @@ sub render {
         $out = encode_utf8($out);
     }->();
 
-    HTTP::Engine::Response->new(
-        status       => 200,
-        content_type => _content_type($req),
-        body         => $html,
+    Plack::Response->new(
+        200,
+        ['Content-Type' => _content_type($req)],
+        $html,
     );
 }
 
@@ -64,11 +64,11 @@ sub _content_type {
 # because au phone returns '400 Bad Request' when redrirect to http://example.com:portnumber/
 sub redirect {
     my $path = shift;
-    HTTP::Engine::Response->new(
-        status => 302,
-        headers => {
+    Plack::Response->new(
+        302,
+        [
             Location => $path
-        },
+        ],
     );
 }
 

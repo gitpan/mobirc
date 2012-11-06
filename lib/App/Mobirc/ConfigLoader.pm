@@ -5,6 +5,7 @@ use Config::Tiny;
 use Storable;
 use App::Mobirc::Util;
 use Encode;
+use JSON;
 
 sub load {
     my ( $class, $stuff ) = @_;
@@ -14,8 +15,13 @@ sub load {
     if ( ref $stuff && ref $stuff eq 'HASH' ) {
         $config = Storable::dclone($stuff);
     }
+    elsif ($stuff =~ /\.json$/) {
+        open my $fh, '<:encoding(utf8)', $stuff or die "cannot open file: $!";
+        my $src = do { local $/; <$fh> };
+        $config = JSON->new->relaxed(1)->decode($src);
+    }
     else {
-        open my $fh, '<:utf8', $stuff or die "cannot open file: $!";
+        open my $fh, '<:encoding(utf8)', $stuff or die "cannot open file: $!";
         my $ini = Config::Tiny->read_string(do { local $/; <$fh> });
         close $fh;
 
@@ -33,6 +39,7 @@ sub load {
 
     # set default vars.
     $config->{global}->{assets_dir}    ||= File::Spec->catfile( $FindBin::Bin, 'assets' );
+    $config->{global}->{recent_log_per_page} ||= 40;
 
     return $config;
 }

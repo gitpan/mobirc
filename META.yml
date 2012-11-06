@@ -1,58 +1,187 @@
 ---
-abstract: ~
+abstract: 'pluggable IRC to HTTP gateway'
 author:
-  - 'Tokuhiro Matsuno and Mobirc AUTHORS.'
+  - 'Tokuhiro Matsuno E<lt>tokuhirom@gmail.comE<gt>'
 build_requires:
-  Sub::Uplevel: 0
-  Test::Exception: 0
-  Test::More: 0
+  Test::Base::Less: 0
+  Test::More: 0.98
+  Test::Requires: 0
   Text::Diff: 0
-distribution_type: module
-generated_by: 'Module::Install version 0.79'
-license: gpl
+configure_requires:
+  Module::Build: 0.4
+dynamic_config: 0
+generated_by: 'Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921'
+license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: mobirc
-no_index:
-  directory:
-    - inc
-    - t
-recommends:
-  Glib: 0.4
-  POE::Loop::Glib: 0.0034
-  POE::Session::Irssi: 0.4
+provides:
+  App::Mobirc:
+    file: lib/App/Mobirc.pm
+    version: 4.01
+  App::Mobirc::ConfigLoader:
+    file: lib/App/Mobirc/ConfigLoader.pm
+    version: 0
+  App::Mobirc::Model::Channel:
+    file: lib/App/Mobirc/Model/Channel.pm
+    version: 0
+  App::Mobirc::Model::Message:
+    file: lib/App/Mobirc/Model/Message.pm
+    version: 0
+  App::Mobirc::Model::Server:
+    file: lib/App/Mobirc/Model/Server.pm
+    version: 0
+  App::Mobirc::Pictogram:
+    file: lib/App/Mobirc/Pictogram.pm
+    version: 0
+  App::Mobirc::Plugin:
+    file: lib/App/Mobirc/Plugin.pm
+    version: 0
+  App::Mobirc::Plugin::ChannelPageParts:
+    file: lib/App/Mobirc/Plugin/ChannelPageParts.pm
+    version: 0
+  App::Mobirc::Plugin::Component::HTTPD:
+    file: lib/App/Mobirc/Plugin/Component/HTTPD.pm
+    version: 0
+  App::Mobirc::Plugin::Component::IRCClient:
+    file: lib/App/Mobirc/Plugin/Component/IRCClient.pm
+    version: 0
+  App::Mobirc::Plugin::Debug:
+    file: lib/App/Mobirc/Plugin/Debug.pm
+    version: 0
+  App::Mobirc::Plugin::DocRoot:
+    file: lib/App/Mobirc/Plugin/DocRoot.pm
+    version: 0
+  App::Mobirc::Plugin::ExpireHeader:
+    file: lib/App/Mobirc/Plugin/ExpireHeader.pm
+    version: 0
+  App::Mobirc::Plugin::HTMLFilter::CompressHTML:
+    file: lib/App/Mobirc/Plugin/HTMLFilter/CompressHTML.pm
+    version: 0
+  App::Mobirc::Plugin::HTMLFilter::DoCoMoCSS:
+    file: lib/App/Mobirc/Plugin/HTMLFilter/DoCoMoCSS.pm
+    version: 0
+  App::Mobirc::Plugin::HTMLFilter::NickGroup:
+    file: lib/App/Mobirc/Plugin/HTMLFilter/NickGroup.pm
+    version: 0
+  App::Mobirc::Plugin::IRCCommand::Metadata:
+    file: lib/App/Mobirc/Plugin/IRCCommand/Metadata.pm
+    version: 0
+  App::Mobirc::Plugin::IRCCommand::TiarraLog:
+    file: lib/App/Mobirc/Plugin/IRCCommand/TiarraLog.pm
+    version: 0
+  App::Mobirc::Plugin::MessageBodyFilter::Clickable:
+    file: lib/App/Mobirc/Plugin/MessageBodyFilter/Clickable.pm
+    version: 0
+  App::Mobirc::Plugin::MessageBodyFilter::IRCColor:
+    file: lib/App/Mobirc/Plugin/MessageBodyFilter/IRCColor.pm
+    version: 0
+  App::Mobirc::Plugin::StickyTime:
+    file: lib/App/Mobirc/Plugin/StickyTime.pm
+    version: 0
+  App::Mobirc::Role::Plaggable:
+    file: lib/App/Mobirc/Role/Plaggable.pm
+    version: 0.04
+  App::Mobirc::Types:
+    file: lib/App/Mobirc/Types.pm
+    version: 0
+  App::Mobirc::Util:
+    file: lib/App/Mobirc/Util.pm
+    version: 0
+  App::Mobirc::Validator:
+    file: lib/App/Mobirc/Validator.pm
+    version: 0
+  App::Mobirc::Web::Base:
+    file: lib/App/Mobirc/Web/Base.pm
+    version: 0
+  App::Mobirc::Web::C:
+    file: lib/App/Mobirc/Web/C.pm
+    version: 0
+  App::Mobirc::Web::C::API:
+    file: lib/App/Mobirc/Web/C/API.pm
+    version: 0
+  App::Mobirc::Web::C::Account:
+    file: lib/App/Mobirc/Web/C/Account.pm
+    version: 0
+  App::Mobirc::Web::C::Ajax:
+    file: lib/App/Mobirc/Web/C/Ajax.pm
+    version: 0
+  App::Mobirc::Web::C::IPhone:
+    file: lib/App/Mobirc/Web/C/IPhone.pm
+    version: 0
+  App::Mobirc::Web::C::IPhone2:
+    file: lib/App/Mobirc/Web/C/IPhone2.pm
+    version: 0
+  App::Mobirc::Web::C::Mobile:
+    file: lib/App/Mobirc/Web/C/Mobile.pm
+    version: 0
+  App::Mobirc::Web::C::Root:
+    file: lib/App/Mobirc/Web/C/Root.pm
+    version: 0
+  App::Mobirc::Web::C::Static:
+    file: lib/App/Mobirc/Web/C/Static.pm
+    version: 0
+  App::Mobirc::Web::Context:
+    file: lib/App/Mobirc/Web/Context.pm
+    version: 0
+  App::Mobirc::Web::Handler:
+    file: lib/App/Mobirc/Web/Handler.pm
+    version: 0
+  App::Mobirc::Web::Router:
+    file: lib/App/Mobirc/Web/Router.pm
+    version: 0
+  App::Mobirc::Web::Tatsumaki:
+    file: lib/App/Mobirc/Web/Tatsumaki.pm
+    version: 0
+  App::Mobirc::Web::Tatsumaki::PollHandler:
+    file: lib/App/Mobirc/Web/Tatsumaki.pm
+    version: 0
+  App::Mobirc::Web::Template:
+    file: lib/App/Mobirc/Web/Template.pm
+    version: 0
+  App::Mobirc::Web::View:
+    file: lib/App/Mobirc/Web/View.pm
+    version: 0
 requires:
+  Any::Moose: 0.13
+  AnyEvent: 5.271
+  AnyEvent::IRC: 0.95
   CSS::Tiny: 1.15
   Config::Tiny: 2.12
+  Data::OptList: 0.105
+  Data::Recursive::Encode: 0
   Exporter: 5.62
-  Filter::Util::Call: 0
   HTML::Entities: 1.35
   HTML::StickyQuery: 0.12
-  HTML::StickyQuery::DoCoMoGUID: 0.01
-  HTTP::Engine: 0.1.2
-  HTTP::Engine::Middleware: 0.01
-  HTTP::MobileAttribute: 0.13
-  HTTP::Session: 0.29
-  HTTPx::Dispatcher: 0.04
+  HTTP::MobileAttribute: 0.21
+  HTTP::Session: 0.44
   JSON: 2.09
+  JavaScript::Value::Escape: 0
   List::MoreUtils: 0.22
   MIME::Base64::URLSafe: 0.01
   Module::Find: 0.06
-  Mouse: 0.16
-  MouseX::Types: 0.01
-  Net::CIDR::MobileJP: 0.16
-  POE: 1.003
-  POE::Component::IRC: 5.88
-  POE::Sugar::Args: 1.3
+  Mouse: 0.6
+  MouseX::Types: 0.05
+  Params::Util: 0
   Params::Validate: 0.91
-  Path::Class: 0.16
+  Path::Class: 0.19
+  Plack: 0.9938
+  Plack::Middleware::ReverseProxy: 0.14
+  Plack::Request: 0.09
+  Router::Simple: 0.05
   String::CamelCase: 0.01
-  String::IRC: 0.01
-  Text::MicroTemplate: 0.05
+  String::IRC: 0.04
+  Tatsumaki: 0.101
+  Text::MicroTemplate: 0.13
+  Text::VisualWidth::PP: 0.01
+  Twiggy: 0.1005
   UNIVERSAL::require: 0.11
   URI: 1.36
-  URI::Find: 0.16
+  URI::Find: 20100505
   YAML: 0.68
-  perl: 5.8.0
-version: 1.99_03
+  parent: 0.223
+  perl: 5.008001
+resources:
+  license: http://dev.perl.org/licenses/
+version: 4.01

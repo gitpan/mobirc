@@ -1,6 +1,8 @@
 package App::Mobirc::Web::Context;
+use strict;
+use warnings;
 use Mouse;
-use HTTP::MobileAttribute;
+use HTTP::MobileAttribute plugins => [qw/IS Core/];
 
 has session => (
     is       => 'rw',
@@ -10,7 +12,7 @@ has session => (
 
 has req => (
     is       => 'rw',
-    isa      => 'HTTP::Engine::Request',
+    isa      => 'Plack::Request',
     required => 1,
 );
 

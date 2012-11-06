@@ -1,17 +1,22 @@
 package App::Mobirc::Web::Handler;
+use strict;
+use warnings;
 use Mouse;
 use Scalar::Util qw/blessed/;
 use HTTP::Session;
 use HTTP::Session::Store::OnMemory;
 use HTTP::Session::State::Cookie;
-use HTTP::Session::State::GUID;
-use HTTP::Session::State::MobileAttributeID;
+use HTTP::Session::State::URI;
 use Module::Find;
+use URI::Escape;
+use Plack::Response;
+use Plack::Request;
 
 use App::Mobirc;
 use App::Mobirc::Util;
 use App::Mobirc::Web::Router;
 use App::Mobirc::Web::Context;
+use App::Mobirc::Web::Tatsumaki;
 useall 'App::Mobirc::Web::C';
 
 my $session_store = HTTP::Session::Store::OnMemory->new(data => {});
@@ -26,16 +31,27 @@ our $CONTEXT;
 sub web_context () { $CONTEXT } ## no critic
 
 sub handler {
-    my $req = shift;
+    my $env = shift;
+
+    global_context->run_hook('env_filter', $env);
+
+    my $req = Plack::Request->new($env);
 
     my $session = _create_session($req);
 
     local $CONTEXT = App::Mobirc::Web::Context->new(req => $req, session => $session);
     my $res = _handler($req, $session);
     global_context->run_hook('response_filter', $res);
-    $session->response_filter( $res );
+    if (ref $res ne 'CODE') { # long poll cannot accept finalizer
+        $session->response_filter( $res );
+    }
     $session->finalize();
-    $res;
+    
+    # DEBUG sprintf("%03d: %s", $res->status, $req->uri->path);
+    if (blessed($res)) {
+        $res = $res->finalize();
+    }
+    return $res;
 }
 
 sub _handler {
@@ -57,13 +73,11 @@ sub _create_session {
     HTTP::Session->new(
         store   => $session_store,
         state   => sub {
-            if ($ma->is_docomo) {
-                HTTP::Session::State::GUID->new(
-                    mobile_attribute => $ma,
-                );
-            } elsif ($ma->can('user_id') && $ma->user_id) {
-                HTTP::Session::State::MobileAttributeID->new(
-                    mobile_attribute => $ma,
+            if ($ma->is_docomo && $ma->cache_size < 500) {
+                # i-mode browser 1.0 does not supports cookie.
+                # $ma->cache_size < 500 means 'i-mode browser 1.0'.
+                HTTP::Session::State::URI->new(
+                    session_id_name => 'sid',
                 );
             } else {
                 HTTP::Session::State::Cookie->new(
@@ -91,7 +105,11 @@ sub authorize {
 sub process_request_authorized {
     my ($req, $session) = @_;
 
-    if (my $rule = App::Mobirc::Web::Router->match($req)) {
+    if ($req->path_info =~ m{^/tatsumaki/}) {
+        return App::Mobirc::Web::Tatsumaki->handler->($req->env);
+    }
+
+    if (my $rule = App::Mobirc::Web::Router->match($req->path_info)) {
         return do_dispatch($rule, $req, $session);
     } else {
         # hook by plugins
@@ -108,15 +126,15 @@ sub process_request_authorized {
 sub process_request_noauth {
     my ($req, $session) = @_;
 
-    if (my $rule = App::Mobirc::Web::Router->match($req)) {
-        if ($rule->{controller} eq 'Account') {
+    if (my $rule = App::Mobirc::Web::Router->match($req->path_info)) {
+        if ($rule->{controller} eq 'Account' || $rule->{controller} eq 'Static') {
             return do_dispatch($rule, $req, $session);
         } else {
-            return HTTP::Engine::Response->new(
-                status => 302,
-                headers => {
-                    Location => '/account/login'
-                }
+            return Plack::Response->new(
+                302,
+                [
+                    Location => '/account/login?return=' . uri_escape($req->request_uri)
+                ]
             );
         }
     } else {
@@ -130,7 +148,7 @@ sub do_dispatch {
     my $meth = $rule->{action};
     my $post_meth = "post_dispatch_$meth";
     my $get_meth  = "dispatch_$meth";
-    my $args = $rule->{args};
+    my $args = $rule;
     $args->{session} = $session;
     $CONTEXT->action( $rule->{action} );
     $CONTEXT->controller( $rule->{controller} );
@@ -144,11 +162,12 @@ sub do_dispatch {
 sub res_404 {
     my ($req, ) = @_;
 
-    my $uri = $req->uri->path;
-    warn "dan the 404 not found: $uri" if $uri ne '/favicon.ico';
-    return HTTP::Engine::Response->new(
-        status => 404,
-        body   => "404 not found: $uri",
+    my $uri = $req->path_info;
+    warn "dan the 404 not found: $uri\n" if $uri ne '/favicon.ico';
+    return Plack::Response->new(
+        404,
+        ['Content-Type' => 'text/plain'],
+        "404 not found: $uri",
     );
 }
 

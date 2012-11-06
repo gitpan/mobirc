@@ -1,5 +1,6 @@
 package App::Mobirc::Plugin::HTMLFilter::DoCoMoCSS;
 use strict;
+use warnings;
 use App::Mobirc::Plugin;
 use CSS::Tiny;
 use HTML::Selector::XPath qw(selector_to_xpath);
@@ -40,7 +41,7 @@ hook 'html_filter' => sub {
             $element->attr('style', $style_attr);
         }
     }
-    $content = decode_utf8($tree->as_HTML);
+    $content = decode_utf8($tree->as_HTML('<>&'));
     $tree = $tree->delete;
 
     return ($req, $pict_unescape->());

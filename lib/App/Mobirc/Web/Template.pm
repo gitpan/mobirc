@@ -2,11 +2,14 @@ package App::Mobirc::Web::Template;
 # template eval. context.
 use strict;
 use warnings;
+use utf8;
 use Encode qw/encode_utf8 decode_utf8/;
 use App::Mobirc::Pictogram ();
 use Path::Class;
 use URI::Escape qw/uri_escape/;
 use App::Mobirc::Web::Base;
+use Text::VisualWidth::PP;
+use JavaScript::Value::Escape qw(javascript_value_escape);
 
 *encoded_string = *Text::MicroTemplate::encoded_string;
 sub pictogram { encoded_string(App::Mobirc::Pictogram::pictogram(@_)) }
@@ -24,7 +27,12 @@ sub include {
     );
 }
 sub docroot {
-    (config->{global}->{root} || '/')
+    for my $plugin (@{ config->{plugin} }) {
+        if ($plugin->{module} eq "DocRoot") {
+            return ($plugin->{config}->{root} || '/');
+        }
+    }
+    return '/';
 }
 sub load_assets {
     my @path = @_;
@@ -42,5 +50,8 @@ sub strip_nl (&) {
         s/[\r\n]//g;
     })->($code);
 }
+
+sub visual_width { Text::VisualWidth::PP::width(@_) }
+sub visual_trim { Text::VisualWidth::PP::trim(@_) }
 
 1;

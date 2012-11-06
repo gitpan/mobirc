@@ -2,7 +2,7 @@ package t::Utils;
 use strict;
 use warnings;
 use lib 'extlib';
-use HTTP::Engine;
+use Test::More;
 use HTTP::Request;
 use App::Mobirc;
 use App::Mobirc::Web::Handler;
@@ -12,6 +12,9 @@ use HTTP::Session::Store::OnMemory;
 use HTTP::Session::State::Null;
 use App::Mobirc::Util;
 use Cwd;
+use HTTP::Message::PSGI;
+use Plack::Request;
+use Plack::Response;
 
 sub import {
     my $pkg = caller(0);
@@ -29,37 +32,54 @@ sub import {
 }
 
 sub create_global_context {
-    App::Mobirc->new(
+    my $c = App::Mobirc->new(
         config => {
             httpd  => { lines => 40 },
             global => {
-                keywords => [qw/foo/], stopwords => [qw/foo31/],
+                keywords => [qw/foo/],
+                stopwords => [qw/foo31/],
                 assets_dir => File::Spec->catfile(Cwd::cwd(), 'assets'),
-            }
+            },
+            plugin => [
+                +{
+                    "module" => "Component::IRCClient",
+                    "config" => {
+                        "host"=>"127.0.0.1",
+                        "port"=>"6667",
+                        "nick"=>"john1",
+                        "desc"=>"john-freenode1",
+                        "username"=>"john-freenode1",
+                        "password"=>"pa55w0rd",
+                        "incode"=>"utf-8",
+                        "id"=>"f1",
+                        "ssl"=> 1,
+                    },
+                }
+            ],
         }
     );
+    return $c;
 }
 
 sub test_he {
     my ($req, $cb) = @_;
+    $req or die "missing request";
+    if ($req->isa('HTTP::Request')) {
+        $req = Plack::Request->new(req_to_psgi($req));
+    }
 
-    HTTP::Engine->new(
-        interface => {
-            module          => 'Test',
-            request_handler => sub {
-                my $req = shift;
-                local $App::Mobirc::Web::Handler::CONTEXT = App::Mobirc::Web::Context->new(
-                    req     => $req,
-                    session => HTTP::Session->new(
-                        store   => HTTP::Session::Store::OnMemory->new(),
-                        state   => HTTP::Session::State::Null->new(),
-                        request => $req,
-                    ),
-                  );
-                $cb->($req),
-            }
-        }
-    )->run( $req );
+    my $app = sub {
+        local $App::Mobirc::Web::Handler::CONTEXT = App::Mobirc::Web::Context->new(
+            req     => $req,
+            session => HTTP::Session->new(
+                store   => HTTP::Session::Store::OnMemory->new(),
+                state   => HTTP::Session::State::Null->new(),
+                request => $req,
+            ),
+        );
+        $cb->($req),
+    };
+    return $app->();
 }
 
 sub test_he_filter(&) {
@@ -70,30 +90,37 @@ sub test_he_filter(&) {
     test_he( HTTP::Request->new('GET', '/', ['User-Agent' => 'MYPC']), sub {
         my $req = shift;
         $cb->($req);
-        return HTTP::Engine::Response->new( status => 200 );
+        return Plack::Response->new( 200 );
     });
 }
 
 sub server () {
-    global_context->server
+    my $c = global_context;
+    unless (@{$c->irc_components}) {
+        $c->run_hook('run_component');
+    }
+    $c->servers->[0];
 }
 
 {
     no warnings 'redefine';
     *App::Mobirc::Web::Template::Run::irc_nick = sub () { 'tokuhirom' };
     *App::Mobirc::Model::Message::irc_nick = sub () { 'tokuhirom' };
-    *App::Mobirc::Util::irc_nick = sub () { 'tokuhirom' };
+    *App::Mobirc::current_nick = sub { 'tokuhirom' };
 }
 
-sub keyword_channel () { server->get_channel(U "*keyword*") }
+sub keyword_channel () { global_context->keyword_channel() }
 
 sub test_channel    () { server->get_channel(U '#test') }
 
 sub describe ($&) {
     my ($name, $code) = @_;
 
-    $code->();
-    keyword_channel->clear_unread();
+    subtest $name => sub {
+        $code->();
+        keyword_channel->clear_unread();
+        done_testing();
+    };
 }
 
 sub test_view {
@@ -109,5 +136,6 @@ sub test_view {
 }
 
 create_global_context();
+global_context->run_hook('run_component');
 
 1;

@@ -1,5 +1,6 @@
 package App::Mobirc::Plugin::DocRoot;
 use strict;
+use warnings;
 use App::Mobirc::Plugin;
 use App::Mobirc::Util;
 use Encode;
@@ -13,30 +14,24 @@ has root => (
     required => 1,
 );
 
-hook request_filter => sub {
-    my ($self, $global_context, $req) = validate_hook('request_filter', @_);
+hook env_filter => sub {
+    my ($self, $global_context, $env) = @_;
 
     my $root = $self->root;
     $root =~ s!/$!!;
 
-    my $path = $req->uri->path;
-    $path =~ s!^$root!!;
-    $req->uri->path($path);
+    $env->{PATH_INFO} =~ s!^$root!!;
+    $env->{SCRIPT_NAME} = $root;
 };
 
 hook response_filter => sub {
-    my ($self, $global_context, $res) = validate_hook('response_filter', @_);
+    my ($self, $global_context, $res) = @_;
 
     if (my $loc = $res->header('Location')) {
-        DEBUG "REWRITE REDIRECT : $loc";
-
         my $root = $self->root;
         $root =~ s!/$!!;
-        $loc = "$root$loc";
-
-        $res->header( Location => $loc );
-
-        DEBUG "FINISHED: $loc";
+        $loc = $root . $loc if $loc !~ /^\Q$root\E/;
+        return $res->header( Location => $loc );
     }
 };
 
@@ -58,6 +53,13 @@ hook html_filter => sub {
             }
         }
     }
+    for my $elem ($tree->findnodes('//img')) {
+        if (my $href = $elem->attr('src')) {
+            if ($href =~ m{^/}) {
+                $elem->attr(src => $root . $href);
+            }
+        }
+    }
     for my $elem ($tree->findnodes('//form')) {
         if (my $uri = $elem->attr('action')) {
             if ($uri =~ m{^/}) {
@@ -66,15 +68,21 @@ hook html_filter => sub {
         }
     }
     for my $elem ($tree->findnodes('//link')) {
-        $elem->attr(href => $root . $elem->attr('href'));
+        if (my $uri = $elem->attr('href')) {
+            if ($uri =~ m{^/}) {
+                $elem->attr(href => $root . $uri);
+            }
+        }
     }
     for my $elem ($tree->findnodes('//script')) {
-        if ($elem->attr('src')) {
-            $elem->attr(src => $root . $elem->attr('src'));
+        if (my $uri = $elem->attr('src')) {
+            if ($uri =~ m{^/}) {
+                $elem->attr(src => $root . $elem->attr('src'));
+            }
         }
     }
 
-    my $html = $tree->as_HTML(q[<>&"'{}], '    ');
+    my $html = $tree->as_HTML(q[<>&"'{}]);
     $tree = $tree->delete;
 
     return ($req, decode_utf8($html));
@@ -89,9 +97,9 @@ App::Mobirc::Plugin::DocRoot - rewrite document root
 
 =head1 SYNOPSIS
 
-    - module: App::Mobirc::Plugin::DocRoot
-      config:
-        root: /foo/
+    # in your config.ini
+    [DocRoot]
+    root=/mobirc/
 
 =head1 DESCRIPTION
 

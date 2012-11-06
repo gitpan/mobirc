@@ -1,5 +1,6 @@
 package App::Mobirc::Role::Plaggable;
 use strict;
+use warnings;
 use Mouse::Role;
 use 5.00800;
 our $VERSION = '0.04';
@@ -20,6 +21,7 @@ sub load_plugin {
     Mouse::load_class($module);
     my $plugin = $module->new($args->{config} || {});
     $plugin->register( $self );
+    $plugin;
 }
 
 sub resolve_plugin {

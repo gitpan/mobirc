@@ -2,15 +2,21 @@ use t::Utils;
 use utf8;
 use App::Mobirc;
 use Encode;
-use Test::Base;
-use t::Utils;
+use Test::Requires 'HTML::TreeBuilder::XPath';
+use Test::Base::Less;
 
 my $global_context = global_context();
 $global_context->load_plugin( {module => 'DocRoot', config => {root => '/foo/'}} );
 
 filters {
-    input => [qw/convert/],
+    input    => [\&convert, \&strip_spaces],
+    expected => [\&strip_spaces],
 };
+
+for my $block (blocks) {
+    is($block->input, $block->expected);
+}
+done_testing;
 
 sub convert {
     my $html = shift;
@@ -22,6 +28,13 @@ sub convert {
     ok Encode::is_utf8($html);
     $html;
 }
+
+sub strip_spaces {
+    local $_ = shift;
+    s/\n\s*//g;
+    s/\n//g;
+}
+
 
 __END__
 
@@ -94,5 +107,24 @@ __END__
         <title>foobar</title>
     </head>
     <body>
+    </body>
+</html>
+===
+--- input
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="ja" xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>foobar</title>
+<body>
+<img src="/dankogai.png">
+</body>
+</html>
+--- expected
+<html lang="ja" xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>foobar</title>
+    </head>
+    <body>
+		<img src="/foo/dankogai.png" />
     </body>
 </html>

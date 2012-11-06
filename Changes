@@ -1,8 +1,21 @@
-1.99_03
+4.01
 
-    2.00 RC3
+    - fixed test cases
+    - and misc bug fixes introduced on 4.00.
 
-    - oops. depend to Net::CIDR::MobileJP 0.16
+4.00
+
+    - support multiple servers
+    - removed android view(is not maintenable)
+    - removed mobile-ajax view(is not maintenable)
+
+3.00
+
+    - switch to plack based.
+    - switch to AnyEvent instead of POE.
+    - do not use 'mobile phone id' for security reason.
+    - use Router::Simple, instead of HTTPx::Dispatcher
+    - rebuilt extlib/ with cpanm
 
 1.99_02
 

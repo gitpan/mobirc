@@ -1,5 +1,6 @@
 use t::Utils;
 use Test::More;
+use Test::Requires 'HTML::TreeBuilder::XPath';
 plan tests => 1;
 use App::Mobirc;
 require App::Mobirc::Plugin::HTMLFilter::DoCoMoCSS;
@@ -20,6 +21,7 @@ test_he_filter {
 my $expected = <<'...';
 <html><head></head><body><a class="time" href="/" style="color:#004080;">foo</a></body></html>
 ...
+$expected =~ s/\n$//;
 
 is $got, $expected;
 

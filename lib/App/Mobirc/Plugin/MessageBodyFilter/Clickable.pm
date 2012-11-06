@@ -1,9 +1,11 @@
 package App::Mobirc::Plugin::MessageBodyFilter::Clickable;
 # vim:expandtab:
 use strict;
+use warnings;
 use App::Mobirc::Plugin;
 use URI::Find;
 use URI::Escape;
+use URI::QueryParam;
 use HTML::Entities;
 use App::Mobirc::Util;
 @URI::tel::ISA = qw( URI );
@@ -44,6 +46,21 @@ has pocket_hatena => (
 has google_gwt => (
     is  => 'ro',
     isa => 'Bool',
+);
+
+has http_extract_image => (
+    is  => 'ro',
+    isa => 'Int',
+);
+
+has http_extract_map => (
+    is  => 'ro',
+    isa => 'Int',
+);
+
+has http_google_maps_api_key => (
+    is  => 'ro',
+    isa => 'Str',
 );
 
 hook message_body_filter => sub {
@@ -94,8 +111,8 @@ sub process_http {
         }eg
     }
 
-    $link_string = encode_entities(uri_unescape($link_string),  q(<>&"));
-    my $encoded_uri = encode_entities($uri, q(<>&"));
+    $link_string = encode_entities(uri_unescape($link_string),  q(<>&"'));
+    my $encoded_uri = encode_entities($uri, q(<>&"'));
 
     if ( $self->redirector ) {
         $out =
@@ -112,6 +129,27 @@ sub process_http {
             $encoded_uri,
             $self->http_link_target,
             $link_string );
+    }
+
+    if ( $self->http_extract_image && $encoded_uri =~ /(png|jpe?g|gif)$/) {
+        $out =
+        sprintf(
+            '<a href="%s" rel="nofollow" class="url" target="%s"><img src="http://mgw.hatena.ne.jp/?url=%s&amp;size=%s" alt="%s"/></a>',
+            $encoded_uri,
+            $self->http_link_target,
+            $encoded_uri,
+            $self->http_extract_image,
+            $link_string );
+    } elsif
+       ( $self->http_extract_map && $uri->host =~ /maps?\.google(?:\.co\.jp|\.com)/ && $uri->path eq '/maps') {
+        my ($lat, $lon) = $uri->query_param('q') =~ /([+-]?\d+\.\d+)\s*,\s*([+-]?\d+\.\d+)/;
+        $out = 
+        sprintf(
+            '<a href="%s"><img src="http://maps.google.com/staticmap?markers=%s&amp;key=%s&amp;zoom=13&amp;maptype=mobile&amp;size=140x140&amp;sensor=false"/></a>',
+            $encoded_uri,
+            "$lat,$lon",
+            $self->http_google_maps_api_key,
+        )
     }
 
     if ( $self->au_pcsv ) {
@@ -148,9 +186,9 @@ sub process_default {
     }
     return sprintf(
         qq{<a href="%s" rel="nofollow" class="url" target="%s">%s</a>},
-        encode_entities($uri, q(<>&")),
+        encode_entities($uri, q(<>&"')),
         $self->http_link_target,
-        encode_entities($link_string, q(<>&")),
+        encode_entities($link_string, q(<>&"')),
     );
 }
 

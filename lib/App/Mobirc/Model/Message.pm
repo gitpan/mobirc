@@ -1,4 +1,6 @@
 package App::Mobirc::Model::Message;
+use strict;
+use warnings;
 use Mouse;
 use App::Mobirc::Util;
 use HTML::Entities;
@@ -32,7 +34,8 @@ has 'time' => (
 sub who_class {
     my $self = shift;
     my $who = $self->who;
-    if ($who && $who eq irc_nick()) {
+    
+    if ($who && App::Mobirc->context->is_my_nick($who)) {
         return 'nick_myself';
     } else {
         return 'nick_normal';
@@ -63,6 +66,23 @@ has html_body => (
         $body || '';
     }
 );
+
+sub as_hashref {
+    my $message = shift;
+
+    return +{
+        body         => $message->body,
+        html_body    => $message->html_body,
+        class        => $message->class,
+        who_class    => $message->who_class,
+        who          => $message->who ? $message->who : undef,
+        hour         => $message->hour,
+        minute       => $message->minute,
+        channel_name => $message->channel->name,
+        channel_fullname => $message->channel->fullname,
+        server       => $message->channel->server->id,
+    };
+}
 
 __PACKAGE__->meta->make_immutable;
 1;

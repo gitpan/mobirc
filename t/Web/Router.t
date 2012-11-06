@@ -1,21 +1,24 @@
 use t::Utils;
-use Test::Base;
+use Test::Base::Less;
 use App::Mobirc::Web::Router;
 use HTTP::Request;
-
-plan tests => 1*blocks;
+use Test::Requires 'YAML';
 
 filters {
-    input    => ['router'],
-    expected => [qw/yaml/],
+    input    => [\&router],
+    expected => [\&YAML::Load],
 };
 
-run_is_deeply input => 'expected';
+run {
+    my $block = shift;
+    is_deeply($block->input, $block->expected);
+};
+done_testing;
 
 sub router {
     my $uri = shift;
     my $req = HTTP::Request->new('GET', $uri);
-    App::Mobirc::Web::Router->match($req);
+    App::Mobirc::Web::Router->match($req->uri->path);
 }
 
 __END__
@@ -25,47 +28,47 @@ __END__
 --- expected
 controller: Root
 action: index
-args: {}
 
 ===
 --- input: /mobile/
 --- expected
 controller: Mobile
 action: index
-args: {}
 
 ===
 --- input: /mobile-ajax/
 --- expected
 controller: MobileAjax
 action: index
-args: {}
 
 ===
 --- input: /mobile-ajax/topics
 --- expected
 controller: MobileAjax
 action: topics
-args: {}
 
 ===
 --- input: /mobile/topics
 --- expected
 controller: Mobile
 action: topics
-args: {}
 
 ===
 --- input: /mobile-ajax/recent
 --- expected
 controller: MobileAjax
 action: recent
-args: {}
 
 ===
 --- input: /mobile-ajax/channels?recent=1&channel=%23scon
 --- expected
 controller: MobileAjax
 action: channels
-args: {}
+
+===
+--- input: /static/jqtouch/jqtouch.min.css
+--- expected
+controller: Static
+action: deliver
+filename: jqtouch/jqtouch.min.css
 

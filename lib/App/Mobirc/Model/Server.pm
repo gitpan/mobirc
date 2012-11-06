@@ -1,5 +1,6 @@
 package App::Mobirc::Model::Server;
 use strict;
+use warnings;
 use Mouse;
 use App::Mobirc::Model::Channel;
 use Carp;
@@ -11,9 +12,28 @@ has channel_map => (
     default => sub { +{} },
 );
 
+has post_command_cb => (
+    is      => 'rw',
+    isa     => 'CodeRef',
+    default => sub { sub { die "posting command is not supported by this server" } },
+);
+
+has id => (
+    is => 'ro',
+    required => 1,
+);
+
+no Mouse;
+
+sub post_command {
+    my ($self, $command, $channel) = @_;
+    $self->post_command_cb->($command, $channel);
+}
+
 sub add_channel {
     my ($self, $channel) = @_;
     croak "missing channel" unless $channel;
+    $channel->server($self);
 
     $self->channel_map->{$channel->name} = $channel;
 }
@@ -26,50 +46,14 @@ sub channels {
 
 sub get_channel {
     my ($self, $name) = @_;
-    croak "channel name is flagged utf8" unless Encode::is_utf8($name);
     croak "invalid channel name : $name" if $name =~ / /;
-    return $self->channel_map->{$name} ||= App::Mobirc::Model::Channel->new(name=> $name);
+    $name = normalize_channel_name($name);
+    return $self->channel_map->{$name} ||= App::Mobirc::Model::Channel->new(name=> $name, server => $self);
 }
 
 sub delete_channel {
     my ($self, $name) = @_;
-    croak "channel name is flagged utf8" unless Encode::is_utf8($name);
     delete $self->channel_map->{$name};
-}
-
-# shortcut
-sub keyword_channel {
-    my $self = shift;
-    $self->get_channel(U '*keyword*');
-}
-
-# ORDER BY unread_lines, last_updated_at;
-sub channels_sorted {
-    my $self = shift;
-
-    my $channels = [
-        reverse
-          map {
-              $_->[0];
-          }
-          sort {
-              $a->[1] <=> $b->[1] ||
-              $a->[2] <=> $b->[2]
-          }
-          map {
-              my $unl  = $_->unread_lines ? 1 : 0;
-              my $buf  = $_->message_log || [];
-              my $last =
-                (grep {
-                    $_->{class} eq "public" ||
-                    $_->{class} eq "notice"
-                } @{ $buf })[-1] || {};
-              my $time = ($last->{time} || 0);
-              [$_, $unl, $time];
-          }
-          $self->channels
-    ];
-    wantarray ? @$channels : $channels;
 }
 
 sub has_unread_message {
@@ -80,11 +64,4 @@ sub has_unread_message {
     return 0;
 }
 
-sub unread_channels {
-    my $self = shift;
-    my @channels = grep { $_->unread_lines } $self->channels;
-    wantarray ? @channels : \@channels;
-}
-
 __PACKAGE__->meta->make_immutable;
-1;
