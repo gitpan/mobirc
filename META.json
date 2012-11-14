@@ -73,7 +73,7 @@
    "provides" : {
       "App::Mobirc" : {
          "file" : "lib/App/Mobirc.pm",
-         "version" : "4.02"
+         "version" : "4.04"
       },
       "App::Mobirc::ConfigLoader" : {
          "file" : "lib/App/Mobirc/ConfigLoader.pm",
@@ -246,5 +246,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "4.02"
+   "version" : "4.04"
 }
