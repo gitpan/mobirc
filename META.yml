@@ -1,25 +1,35 @@
 ---
 abstract: 'pluggable IRC to HTTP gateway'
 author:
-  - 'Tokuhiro Matsuno E<lt>tokuhirom@gmail.comE<gt>'
+  - 'Tokuhiro Matsuno <tokuhirom@gmail.com>'
 build_requires:
   Test::Base::Less: 0
   Test::More: 0.98
   Test::Requires: 0
   Text::Diff: 0
 configure_requires:
-  Module::Build: 0.4
+  CPAN::Meta: 0
+  CPAN::Meta::Prereqs: 0
+  Module::Build: 0.38
 dynamic_config: 0
-generated_by: 'Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921'
+generated_by: 'Minilla/v0.0.49, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: mobirc
+no_index:
+  directory:
+    - t
+    - xt
+    - inc
+    - share
+    - eg
+    - examples
 provides:
   App::Mobirc:
     file: lib/App/Mobirc.pm
-    version: 4.04
+    version: 4.05
   App::Mobirc::ConfigLoader:
     file: lib/App/Mobirc/ConfigLoader.pm
     version: 0
@@ -82,7 +92,7 @@ provides:
     version: 0
   App::Mobirc::Role::Plaggable:
     file: lib/App/Mobirc/Role/Plaggable.pm
-    version: 0.04
+    version: 4.05
   App::Mobirc::Types:
     file: lib/App/Mobirc/Types.pm
     version: 0
@@ -181,7 +191,35 @@ requires:
   URI::Find: 20100505
   YAML: 0.68
   parent: 0.223
-  perl: 5.01
+  perl: 5.01000
 resources:
-  license: http://dev.perl.org/licenses/
-version: 4.04
+  bugtracker: https://github.com/tokuhirom/mobirc/issues
+  homepage: https://github.com/tokuhirom/mobirc
+  repository: git://github.com/tokuhirom/mobirc.git
+version: 4.05
+x_contributors:
+  - 'miyagawa <miyagawa@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'yappo <yappo@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'typester <typester@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'mayuki <mayuki@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'xcezx <xcezx@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'drry <drry@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'kan <kan@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'klm <klm@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'elim <elim@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'hakobe <hakobe@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'otsune <otsune@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'cho45 <cho45@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'topia <topia@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'kga <kga@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'aerith <aerith@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'hirose31 <hirose31@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'retlet <retlet@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'walf443 <walf443@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'tokuhirom <tokuhirom@d0d07461-0603-4401-acd4-de1884942a52>'
+  - 'Tokuhiro Matsuno <tokuhirom@gp.ath.cx>'
+  - 'Masafumi Otsune <info@otsune.com>'
+  - 'hidek <hide@hide-k.net>'
+  - 'HIROSE Masaaki <hirose31@gmail.com>'
+  - 'cho45 <cho45@lowreal.net>'
+  - 'mattn <mattn.jp@gmail.com>'
