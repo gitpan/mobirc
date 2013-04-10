@@ -12,7 +12,7 @@ configure_requires:
   CPAN::Meta::Prereqs: 0
   Module::Build: 0.38
 dynamic_config: 0
-generated_by: 'Minilla/v0.0.52, CPAN::Meta::Converter version 2.120921'
+generated_by: 'Minilla/v0.0.53, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -26,10 +26,11 @@ no_index:
     - share
     - eg
     - examples
+    - author
 provides:
   App::Mobirc:
     file: lib/App/Mobirc.pm
-    version: 4.06
+    version: 4.07
   App::Mobirc::ConfigLoader:
     file: lib/App/Mobirc/ConfigLoader.pm
     version: 0
@@ -92,7 +93,7 @@ provides:
     version: 0
   App::Mobirc::Role::Plaggable:
     file: lib/App/Mobirc/Role/Plaggable.pm
-    version: 4.06
+    version: 4.07
   App::Mobirc::Types:
     file: lib/App/Mobirc/Types.pm
     version: 0
@@ -196,7 +197,7 @@ resources:
   bugtracker: https://github.com/tokuhirom/mobirc/issues
   homepage: https://github.com/tokuhirom/mobirc
   repository: git://github.com/tokuhirom/mobirc.git
-version: 4.06
+version: 4.07
 x_contributors:
   - 'miyagawa <miyagawa@d0d07461-0603-4401-acd4-de1884942a52>'
   - 'yappo <yappo@d0d07461-0603-4401-acd4-de1884942a52>'

@@ -110,6 +110,11 @@ assets/tmpl/parts/irc_message.mt
 assets/tmpl/parts/keyword_line.mt
 assets/tmpl/parts/wrapper.mt
 assets/tmpl/root/index.mt
+author/cleanup-extlib.sh
+author/cpanm
+author/cpanm.org
+author/memorymap.pl
+author/pictogrammap.pl
 config.ini.sample
 config.json.sample
 cpanfile
@@ -180,11 +185,6 @@ t/Web/Template/Mobile/topics.t
 t/Web/Template/visual_width.t
 t/irc.t
 t/js.t
-tools/cleanup-extlib.sh
-tools/cpanm
-tools/cpanm.org
-tools/memorymap.pl
-tools/pictogrammap.pl
 xt/02_perlcritic.t
 Build.PL
 LICENSE
